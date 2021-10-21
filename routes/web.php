@@ -16,3 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::group(['middleware' => 'web'], function () {
+    Route::get('{any?}', 'UserController@index')->where('any', '.*')->name('main');
+});
