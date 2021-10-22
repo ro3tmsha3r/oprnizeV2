@@ -1653,6 +1653,1819 @@ function type(rule, value, callback, source, options) {
 
 /***/ }),
 
+/***/ "./node_modules/axios/index.js":
+/*!*************************************!*\
+  !*** ./node_modules/axios/index.js ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(/*! ./lib/axios */ "./node_modules/axios/lib/axios.js");
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/adapters/xhr.js":
+/*!************************************************!*\
+  !*** ./node_modules/axios/lib/adapters/xhr.js ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+var settle = __webpack_require__(/*! ./../core/settle */ "./node_modules/axios/lib/core/settle.js");
+var buildURL = __webpack_require__(/*! ./../helpers/buildURL */ "./node_modules/axios/lib/helpers/buildURL.js");
+var buildFullPath = __webpack_require__(/*! ../core/buildFullPath */ "./node_modules/axios/lib/core/buildFullPath.js");
+var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ "./node_modules/axios/lib/helpers/parseHeaders.js");
+var isURLSameOrigin = __webpack_require__(/*! ./../helpers/isURLSameOrigin */ "./node_modules/axios/lib/helpers/isURLSameOrigin.js");
+var createError = __webpack_require__(/*! ../core/createError */ "./node_modules/axios/lib/core/createError.js");
+
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
+
+    if (utils.isFormData(requestData)) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    var request = new XMLHttpRequest();
+
+    // HTTP basic authentication
+    if (config.auth) {
+      var username = config.auth.username || '';
+      var password = config.auth.password || '';
+      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+    }
+
+    var fullPath = buildFullPath(config.baseURL, config.url);
+    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
+
+    // Set the request timeout in MS
+    request.timeout = config.timeout;
+
+    // Listen for ready state
+    request.onreadystatechange = function handleLoad() {
+      if (!request || request.readyState !== 4) {
+        return;
+      }
+
+      // The request errored out and we didn't get a response, this will be
+      // handled by onerror instead
+      // With one exception: request that using file: protocol, most browsers
+      // will return status as 0 even though it's a successful request
+      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+        return;
+      }
+
+      // Prepare the response
+      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var response = {
+        data: responseData,
+        status: request.status,
+        statusText: request.statusText,
+        headers: responseHeaders,
+        config: config,
+        request: request
+      };
+
+      settle(resolve, reject, response);
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle browser request cancellation (as opposed to a manual cancellation)
+    request.onabort = function handleAbort() {
+      if (!request) {
+        return;
+      }
+
+      reject(createError('Request aborted', config, 'ECONNABORTED', request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
+      if (config.timeoutErrorMessage) {
+        timeoutErrorMessage = config.timeoutErrorMessage;
+      }
+      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Add xsrf header
+    // This is only done if running in a standard browser environment.
+    // Specifically not if we're in a web worker, or react-native.
+    if (utils.isStandardBrowserEnv()) {
+      var cookies = __webpack_require__(/*! ./../helpers/cookies */ "./node_modules/axios/lib/helpers/cookies.js");
+
+      // Add xsrf header
+      var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
+        cookies.read(config.xsrfCookieName) :
+        undefined;
+
+      if (xsrfValue) {
+        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+      }
+    }
+
+    // Add headers to the request
+    if ('setRequestHeader' in request) {
+      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          // Remove Content-Type if data is undefined
+          delete requestHeaders[key];
+        } else {
+          // Otherwise add header to the request
+          request.setRequestHeader(key, val);
+        }
+      });
+    }
+
+    // Add withCredentials to request if needed
+    if (!utils.isUndefined(config.withCredentials)) {
+      request.withCredentials = !!config.withCredentials;
+    }
+
+    // Add responseType to request if needed
+    if (config.responseType) {
+      try {
+        request.responseType = config.responseType;
+      } catch (e) {
+        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
+        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
+        if (config.responseType !== 'json') {
+          throw e;
+        }
+      }
+    }
+
+    // Handle progress if needed
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress);
+    }
+
+    // Not all browsers support upload events
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress);
+    }
+
+    if (config.cancelToken) {
+      // Handle cancellation
+      config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+          return;
+        }
+
+        request.abort();
+        reject(cancel);
+        // Clean up request
+        request = null;
+      });
+    }
+
+    if (requestData === undefined) {
+      requestData = null;
+    }
+
+    // Send the request
+    request.send(requestData);
+  });
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/axios.js":
+/*!*****************************************!*\
+  !*** ./node_modules/axios/lib/axios.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./utils */ "./node_modules/axios/lib/utils.js");
+var bind = __webpack_require__(/*! ./helpers/bind */ "./node_modules/axios/lib/helpers/bind.js");
+var Axios = __webpack_require__(/*! ./core/Axios */ "./node_modules/axios/lib/core/Axios.js");
+var mergeConfig = __webpack_require__(/*! ./core/mergeConfig */ "./node_modules/axios/lib/core/mergeConfig.js");
+var defaults = __webpack_require__(/*! ./defaults */ "./node_modules/axios/lib/defaults.js");
+
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */
+function createInstance(defaultConfig) {
+  var context = new Axios(defaultConfig);
+  var instance = bind(Axios.prototype.request, context);
+
+  // Copy axios.prototype to instance
+  utils.extend(instance, Axios.prototype, context);
+
+  // Copy context to instance
+  utils.extend(instance, context);
+
+  return instance;
+}
+
+// Create the default instance to be exported
+var axios = createInstance(defaults);
+
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios;
+
+// Factory for creating new instances
+axios.create = function create(instanceConfig) {
+  return createInstance(mergeConfig(axios.defaults, instanceConfig));
+};
+
+// Expose Cancel & CancelToken
+axios.Cancel = __webpack_require__(/*! ./cancel/Cancel */ "./node_modules/axios/lib/cancel/Cancel.js");
+axios.CancelToken = __webpack_require__(/*! ./cancel/CancelToken */ "./node_modules/axios/lib/cancel/CancelToken.js");
+axios.isCancel = __webpack_require__(/*! ./cancel/isCancel */ "./node_modules/axios/lib/cancel/isCancel.js");
+
+// Expose all/spread
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = __webpack_require__(/*! ./helpers/spread */ "./node_modules/axios/lib/helpers/spread.js");
+
+module.exports = axios;
+
+// Allow use of default import syntax in TypeScript
+module.exports.default = axios;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/cancel/Cancel.js":
+/*!*************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/Cancel.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+module.exports = Cancel;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/cancel/CancelToken.js":
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/CancelToken.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Cancel = __webpack_require__(/*! ./Cancel */ "./node_modules/axios/lib/cancel/Cancel.js");
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/cancel/isCancel.js":
+/*!***************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/isCancel.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/Axios.js":
+/*!**********************************************!*\
+  !*** ./node_modules/axios/lib/core/Axios.js ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+var buildURL = __webpack_require__(/*! ../helpers/buildURL */ "./node_modules/axios/lib/helpers/buildURL.js");
+var InterceptorManager = __webpack_require__(/*! ./InterceptorManager */ "./node_modules/axios/lib/core/InterceptorManager.js");
+var dispatchRequest = __webpack_require__(/*! ./dispatchRequest */ "./node_modules/axios/lib/core/dispatchRequest.js");
+var mergeConfig = __webpack_require__(/*! ./mergeConfig */ "./node_modules/axios/lib/core/mergeConfig.js");
+
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager(),
+    response: new InterceptorManager()
+  };
+}
+
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */
+Axios.prototype.request = function request(config) {
+  /*eslint no-param-reassign:0*/
+  // Allow for axios('example/url'[, config]) a la fetch API
+  if (typeof config === 'string') {
+    config = arguments[1] || {};
+    config.url = arguments[0];
+  } else {
+    config = config || {};
+  }
+
+  config = mergeConfig(this.defaults, config);
+
+  // Set config.method
+  if (config.method) {
+    config.method = config.method.toLowerCase();
+  } else if (this.defaults.method) {
+    config.method = this.defaults.method.toLowerCase();
+  } else {
+    config.method = 'get';
+  }
+
+  // Hook up interceptors middleware
+  var chain = [dispatchRequest, undefined];
+  var promise = Promise.resolve(config);
+
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    chain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  while (chain.length) {
+    promise = promise.then(chain.shift(), chain.shift());
+  }
+
+  return promise;
+};
+
+Axios.prototype.getUri = function getUri(config) {
+  config = mergeConfig(this.defaults, config);
+  return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
+};
+
+// Provide aliases for supported request methods
+utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url
+    }));
+  };
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+
+module.exports = Axios;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/InterceptorManager.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/axios/lib/core/InterceptorManager.js ***!
+  \***********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */
+InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected
+  });
+  return this.handlers.length - 1;
+};
+
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+
+module.exports = InterceptorManager;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/buildFullPath.js":
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/core/buildFullPath.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var isAbsoluteURL = __webpack_require__(/*! ../helpers/isAbsoluteURL */ "./node_modules/axios/lib/helpers/isAbsoluteURL.js");
+var combineURLs = __webpack_require__(/*! ../helpers/combineURLs */ "./node_modules/axios/lib/helpers/combineURLs.js");
+
+/**
+ * Creates a new URL by combining the baseURL with the requestedURL,
+ * only when the requestedURL is not already an absolute URL.
+ * If the requestURL is absolute, this function returns the requestedURL untouched.
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} requestedURL Absolute or relative URL to combine
+ * @returns {string} The combined full path
+ */
+module.exports = function buildFullPath(baseURL, requestedURL) {
+  if (baseURL && !isAbsoluteURL(requestedURL)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/createError.js":
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/core/createError.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var enhanceError = __webpack_require__(/*! ./enhanceError */ "./node_modules/axios/lib/core/enhanceError.js");
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+module.exports = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/dispatchRequest.js":
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/core/dispatchRequest.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+var transformData = __webpack_require__(/*! ./transformData */ "./node_modules/axios/lib/core/transformData.js");
+var isCancel = __webpack_require__(/*! ../cancel/isCancel */ "./node_modules/axios/lib/cancel/isCancel.js");
+var defaults = __webpack_require__(/*! ../defaults */ "./node_modules/axios/lib/defaults.js");
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+module.exports = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers
+  );
+
+  utils.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/enhanceError.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/axios/lib/core/enhanceError.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+module.exports = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+
+  error.request = request;
+  error.response = response;
+  error.isAxiosError = true;
+
+  error.toJSON = function() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+      fileName: this.fileName,
+      lineNumber: this.lineNumber,
+      columnNumber: this.columnNumber,
+      stack: this.stack,
+      // Axios
+      config: this.config,
+      code: this.code
+    };
+  };
+  return error;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/mergeConfig.js":
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/core/mergeConfig.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ../utils */ "./node_modules/axios/lib/utils.js");
+
+/**
+ * Config-specific merge-function which creates a new config-object
+ * by merging two configuration objects together.
+ *
+ * @param {Object} config1
+ * @param {Object} config2
+ * @returns {Object} New object resulting from merging config2 to config1
+ */
+module.exports = function mergeConfig(config1, config2) {
+  // eslint-disable-next-line no-param-reassign
+  config2 = config2 || {};
+  var config = {};
+
+  var valueFromConfig2Keys = ['url', 'method', 'params', 'data'];
+  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy'];
+  var defaultToConfig2Keys = [
+    'baseURL', 'url', 'transformRequest', 'transformResponse', 'paramsSerializer',
+    'timeout', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
+    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress',
+    'maxContentLength', 'validateStatus', 'maxRedirects', 'httpAgent',
+    'httpsAgent', 'cancelToken', 'socketPath'
+  ];
+
+  utils.forEach(valueFromConfig2Keys, function valueFromConfig2(prop) {
+    if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    }
+  });
+
+  utils.forEach(mergeDeepPropertiesKeys, function mergeDeepProperties(prop) {
+    if (utils.isObject(config2[prop])) {
+      config[prop] = utils.deepMerge(config1[prop], config2[prop]);
+    } else if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    } else if (utils.isObject(config1[prop])) {
+      config[prop] = utils.deepMerge(config1[prop]);
+    } else if (typeof config1[prop] !== 'undefined') {
+      config[prop] = config1[prop];
+    }
+  });
+
+  utils.forEach(defaultToConfig2Keys, function defaultToConfig2(prop) {
+    if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    } else if (typeof config1[prop] !== 'undefined') {
+      config[prop] = config1[prop];
+    }
+  });
+
+  var axiosKeys = valueFromConfig2Keys
+    .concat(mergeDeepPropertiesKeys)
+    .concat(defaultToConfig2Keys);
+
+  var otherKeys = Object
+    .keys(config2)
+    .filter(function filterAxiosKeys(key) {
+      return axiosKeys.indexOf(key) === -1;
+    });
+
+  utils.forEach(otherKeys, function otherKeysDefaultToConfig2(prop) {
+    if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    } else if (typeof config1[prop] !== 'undefined') {
+      config[prop] = config1[prop];
+    }
+  });
+
+  return config;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/settle.js":
+/*!***********************************************!*\
+  !*** ./node_modules/axios/lib/core/settle.js ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var createError = __webpack_require__(/*! ./createError */ "./node_modules/axios/lib/core/createError.js");
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+module.exports = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/transformData.js":
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/core/transformData.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */
+module.exports = function transformData(data, headers, fns) {
+  /*eslint no-param-reassign:0*/
+  utils.forEach(fns, function transform(fn) {
+    data = fn(data, headers);
+  });
+
+  return data;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/defaults.js":
+/*!********************************************!*\
+  !*** ./node_modules/axios/lib/defaults.js ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+
+var utils = __webpack_require__(/*! ./utils */ "./node_modules/axios/lib/utils.js");
+var normalizeHeaderName = __webpack_require__(/*! ./helpers/normalizeHeaderName */ "./node_modules/axios/lib/helpers/normalizeHeaderName.js");
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = __webpack_require__(/*! ./adapters/xhr */ "./node_modules/axios/lib/adapters/xhr.js");
+  } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
+    // For node use HTTP adapter
+    adapter = __webpack_require__(/*! ./adapters/http */ "./node_modules/axios/lib/adapters/xhr.js");
+  }
+  return adapter;
+}
+
+var defaults = {
+  adapter: getDefaultAdapter(),
+
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Accept');
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils.isFormData(data) ||
+      utils.isArrayBuffer(data) ||
+      utils.isBuffer(data) ||
+      utils.isStream(data) ||
+      utils.isFile(data) ||
+      utils.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+
+  transformResponse: [function transformResponse(data) {
+    /*eslint no-param-reassign:0*/
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) { /* Ignore */ }
+    }
+    return data;
+  }],
+
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
+  timeout: 0,
+
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+
+  maxContentLength: -1,
+
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+
+module.exports = defaults;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../process/browser.js */ "./node_modules/process/browser.js")))
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/bind.js":
+/*!************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/bind.js ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/buildURL.js":
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/buildURL.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+function encode(val) {
+  return encodeURIComponent(val).
+    replace(/%40/gi, '@').
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+module.exports = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils.forEach(val, function parseValue(v) {
+        if (utils.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode(key) + '=' + encode(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    var hashmarkIndex = url.indexOf('#');
+    if (hashmarkIndex !== -1) {
+      url = url.slice(0, hashmarkIndex);
+    }
+
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/combineURLs.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/combineURLs.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/cookies.js":
+/*!***************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/cookies.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+    (function standardBrowserEnv() {
+      return {
+        write: function write(name, value, expires, path, domain, secure) {
+          var cookie = [];
+          cookie.push(name + '=' + encodeURIComponent(value));
+
+          if (utils.isNumber(expires)) {
+            cookie.push('expires=' + new Date(expires).toGMTString());
+          }
+
+          if (utils.isString(path)) {
+            cookie.push('path=' + path);
+          }
+
+          if (utils.isString(domain)) {
+            cookie.push('domain=' + domain);
+          }
+
+          if (secure === true) {
+            cookie.push('secure');
+          }
+
+          document.cookie = cookie.join('; ');
+        },
+
+        read: function read(name) {
+          var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+          return (match ? decodeURIComponent(match[3]) : null);
+        },
+
+        remove: function remove(name) {
+          this.write(name, '', Date.now() - 86400000);
+        }
+      };
+    })() :
+
+  // Non standard browser env (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return {
+        write: function write() {},
+        read: function read() { return null; },
+        remove: function remove() {}
+      };
+    })()
+);
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/isAbsoluteURL.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
+  \*********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */
+module.exports = function isAbsoluteURL(url) {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/isURLSameOrigin.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
+  \***********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+    (function standardBrowserEnv() {
+      var msie = /(msie|trident)/i.test(navigator.userAgent);
+      var urlParsingNode = document.createElement('a');
+      var originURL;
+
+      /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */
+      function resolveURL(url) {
+        var href = url;
+
+        if (msie) {
+        // IE needs attribute set twice to normalize properties
+          urlParsingNode.setAttribute('href', href);
+          href = urlParsingNode.href;
+        }
+
+        urlParsingNode.setAttribute('href', href);
+
+        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+        return {
+          href: urlParsingNode.href,
+          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+          host: urlParsingNode.host,
+          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+          hostname: urlParsingNode.hostname,
+          port: urlParsingNode.port,
+          pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+            urlParsingNode.pathname :
+            '/' + urlParsingNode.pathname
+        };
+      }
+
+      originURL = resolveURL(window.location.href);
+
+      /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */
+      return function isURLSameOrigin(requestURL) {
+        var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+        return (parsed.protocol === originURL.protocol &&
+            parsed.host === originURL.host);
+      };
+    })() :
+
+  // Non standard browser envs (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return function isURLSameOrigin() {
+        return true;
+      };
+    })()
+);
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/normalizeHeaderName.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
+  \***************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ../utils */ "./node_modules/axios/lib/utils.js");
+
+module.exports = function normalizeHeaderName(headers, normalizedName) {
+  utils.forEach(headers, function processHeader(value, name) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+      headers[normalizedName] = value;
+      delete headers[name];
+    }
+  });
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/parseHeaders.js":
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/parseHeaders.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */
+module.exports = function parseHeaders(headers) {
+  var parsed = {};
+  var key;
+  var val;
+  var i;
+
+  if (!headers) { return parsed; }
+
+  utils.forEach(headers.split('\n'), function parser(line) {
+    i = line.indexOf(':');
+    key = utils.trim(line.substr(0, i)).toLowerCase();
+    val = utils.trim(line.substr(i + 1));
+
+    if (key) {
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
+    }
+  });
+
+  return parsed;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/spread.js":
+/*!**************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/spread.js ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+module.exports = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/utils.js":
+/*!*****************************************!*\
+  !*** ./node_modules/axios/lib/utils.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var bind = __webpack_require__(/*! ./helpers/bind */ "./node_modules/axios/lib/helpers/bind.js");
+
+/*global toString:true*/
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is a Buffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Buffer, otherwise false
+ */
+function isBuffer(val) {
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
+    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ * nativescript
+ *  navigator.product -> 'NativeScript' or 'NS'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
+                                           navigator.product === 'NativeScript' ||
+                                           navigator.product === 'NS')) {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = merge(result[key], val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Function equal to merge with the difference being that no reference
+ * to original objects is kept.
+ *
+ * @see merge
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function deepMerge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = deepMerge(result[key], val);
+    } else if (typeof val === 'object') {
+      result[key] = deepMerge({}, val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+module.exports = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  deepMerge: deepMerge,
+  extend: extend,
+  trim: trim
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/babel-helper-vue-jsx-merge-props/index.js":
 /*!****************************************************************!*\
   !*** ./node_modules/babel-helper-vue-jsx-merge-props/index.js ***!
@@ -1748,6 +3561,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _assets_main__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_assets_main__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var element_ui__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! element-ui */ "./node_modules/element-ui/lib/element-ui.common.js");
 /* harmony import */ var element_ui__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(element_ui__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var vue_router__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vue-router */ "./node_modules/vue-router/dist/vue-router.esm.js");
+/* harmony import */ var _utils_validate__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../utils/validate */ "./resources/js/views/utils/validate.js");
 //
 //
 //
@@ -1852,21 +3669,58 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+
+
+
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "login",
   data: function data() {
+    var validateEmail = function validateEmail(rule, value, callback) {
+      if (!Object(_utils_validate__WEBPACK_IMPORTED_MODULE_4__["validEmail"])(value)) {
+        callback(new Error("Please enter the correct email"));
+      } else {
+        callback();
+      }
+    };
+
+    var validatePass = function validatePass(rule, value, callback) {
+      if (value.length < 4) {
+        callback(new Error("Password cannot be less than 4 digits"));
+      } else {
+        callback();
+      }
+    };
+
     return {
       login: {
-        email: '',
-        password: ''
+        email: "",
+        password: "",
+        organization: ""
       },
+      rememberMe: false,
+      loginRules: {
+        email: [{
+          required: true,
+          trigger: "blur",
+          validator: validateEmail
+        }],
+        password: [{
+          required: true,
+          trigger: "blur",
+          validator: validatePass
+        }]
+      },
+      loading: false,
+      pwdType: "password",
       isSubmited: false,
       options: [],
       value: [],
       list: [],
-      loading: false,
       states: [{
         label: "Alabama",
         value: "Alabama"
@@ -1876,36 +3730,56 @@ __webpack_require__.r(__webpack_exports__);
       }]
     };
   },
-  mounted: function mounted() {
-    this.list = this.states.map(function (item) {
-      return {
-        value: "value:".concat(item),
-        label: "label:".concat(item)
-      };
-    });
-  },
   methods: {
-    showPassword: function showPassword() {
-      console.log(this.login.password);
-    },
     submitName: function submitName(orgName) {
       this.isSubmited = true;
       console.log(orgName);
     },
-    remoteMethod: function remoteMethod(query) {
+    showPwd: function showPwd() {
+      if (this.pwdType === "password") {
+        this.pwdType = "";
+      } else {
+        this.pwdType = "password";
+      }
+    },
+    handleLogin: function handleLogin() {
       var _this = this;
 
-      if (query !== "") {
-        this.loading = true;
-        setTimeout(function () {
-          _this.loading = false;
-          _this.options = _this.list.filter(function (item) {
-            return item.label.toLowerCase().indexOf(query.toLowerCase()) > -1;
+      this.loading = true;
+      axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("/login", {
+        login: this.login,
+        remember: this.rememberMe
+      }).then(function (response) {
+        _this.$message({
+          showClose: true,
+          message: "Welcome " + _this.login.email,
+          type: "success"
+        });
+
+        vue_router__WEBPACK_IMPORTED_MODULE_3__["default"].push({
+          path: "/"
+        });
+      })["catch"](function (err) {
+        _this.loading = false;
+
+        if (err.response.status == 422) {
+          console.log(err.response, "incorrect Email or password");
+
+          _this.$message({
+            showClose: true,
+            message: "The given data was invalid.",
+            type: "error"
           });
-        }, 200);
-      } else {
-        this.options = [];
-      }
+        } else {
+          console.log(err.response, "error");
+
+          _this.$message({
+            showClose: true,
+            message: "Error, Please retry again!.",
+            type: "error"
+          });
+        }
+      });
     }
   }
 });
@@ -3880,7 +5754,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 exports.i(__webpack_require__(/*! -!../../../../node_modules/css-loader!./assets/style.css */ "./node_modules/css-loader/index.js!./resources/js/views/auth/assets/style.css"), "");
 
 // module
-exports.push([module.i, ".select-org {\n  position: relative;\n  width: 100%;\n  margin: 15px auto;\n}\n.select-org el-select, .select-org el-input {\n  width: 100%;\n  padding: 10px 5px 10px 40px;\n  display: block;\n  border: 2px solid #cecbcb;\n  border-radius: 4px;\n  transition: 0.2s ease-out;\n  background-color: #f7f7f7;\n  color: #a1a1a1;\n}\n.select-org .el-icon-office-building {\n  padding: 10px 0;\n  font-size: 20px;\n}\n.select-org .el-icon-office-building:focus {\n  color: #2c50f1;\n}\ninput.el-input__inner {\n  background-color: #f7f7f7 !important;\n  padding: 20px 20px;\n}\n.el-input.is-active .el-input__inner,\n.el-input__inner:focus {\n  border-color: #409eff;\n  color: #409EFF;\n}\n.el-select .el-input__inner {\n  font-size: 14px;\n  font-weight: 300;\n}\nh5 {\n  padding-bottom: 10px;\n}\n.login-more {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n.login-more .copy {\n  color: white;\n  text-align: center;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n}\n.login-more h1 {\n  font-weight: 700;\n  font-size: 4rem;\n  margin: 30px 0;\n}\n.login-more p {\n  font-weight: 500;\n  color: white;\n  margin: 20px 0;\n  font-size: 1.5rem;\n}\n.img-org {\n  display: flex;\n  margin: 10px 0;\n}\n.img-org p {\n  padding: 15px 5px;\n}\n.circle-image {\n  display: inline-block;\n  border-radius: 50%;\n  overflow: hidden;\n  width: 50px;\n  height: 50px;\n}\n.circle-image img {\n  width: 100%;\n  height: 100%;\n  -o-object-fit: cover;\n     object-fit: cover;\n}\n.login-info {\n  margin: 20px 0;\n}\n.login-info label {\n  font-size: 12px;\n}\n.el-input__icon .el-icon-view {\n  cursor: pointer;\n}", ""]);
+exports.push([module.i, "", ""]);
 
 // exports
 
@@ -3919,7 +5793,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../node_modules/c
 
 
 // module
-exports.push([module.i, "/* FONT */\r\n\r\n@font-face {\r\n\tfont-family: Poppins-Regular;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/poppins/Poppins-Regular.ttf */ "./resources/js/views/auth/assets/fonts/poppins/Poppins-Regular.ttf")) + "); \r\n  }\r\n  \r\n  @font-face {\r\n\tfont-family: Poppins-Medium;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/poppins/Poppins-Medium.ttf */ "./resources/js/views/auth/assets/fonts/poppins/Poppins-Medium.ttf")) + "); \r\n  }\r\n  \r\n  @font-face {\r\n\tfont-family: Poppins-Bold;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/poppins/Poppins-Bold.ttf */ "./resources/js/views/auth/assets/fonts/poppins/Poppins-Bold.ttf")) + "); \r\n  }\r\n  \r\n  @font-face {\r\n\tfont-family: Poppins-SemiBold;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/poppins/Poppins-SemiBold.ttf */ "./resources/js/views/auth/assets/fonts/poppins/Poppins-SemiBold.ttf")) + "); \r\n  }\r\n  \r\n  @font-face {\r\n\tfont-family: Montserrat-Bold;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/montserrat/Montserrat-Bold.ttf */ "./resources/js/views/auth/assets/fonts/montserrat/Montserrat-Bold.ttf")) + "); \r\n  }\r\n  \r\n  @font-face {\r\n\tfont-family: Montserrat-SemiBold;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/montserrat/Montserrat-SemiBold.ttf */ "./resources/js/views/auth/assets/fonts/montserrat/Montserrat-SemiBold.ttf")) + "); \r\n  }\r\n  \r\n  @font-face {\r\n\tfont-family: Montserrat-Regular;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/montserrat/Montserrat-Regular.ttf */ "./resources/js/views/auth/assets/fonts/montserrat/Montserrat-Regular.ttf")) + "); \r\n  }\r\n  \r\n  \r\n  /* RESTYLE TAG */\r\n  \r\n  * {\r\n\t  margin: 0px; \r\n\t  padding: 0px; \r\n\t  box-sizing: border-box;\r\n  }\r\n  \r\n  body, html {\r\n\t  height: 100%;\r\n\t  font-family: Poppins-Regular, sans-serif;\r\n  }\r\n  \r\n  a {\r\n\t  font-family: Poppins-Regular;\r\n\t  font-size: 14px;\r\n\t  line-height: 1.7;\r\n\t  color: #666666;\r\n\t  margin: 0px;\r\n\t  transition: all 0.4s;\r\n\t  -webkit-transition: all 0.4s;\r\n\t-o-transition: all 0.4s;\r\n\t-moz-transition: all 0.4s;\r\n  }\r\n  \r\n  a:focus {\r\n\t  outline: none !important;\r\n  }\r\n  \r\n  a:hover {\r\n\t  text-decoration: none;\r\n\tcolor: #6675df;\r\n  }\r\n  \r\n  h1,h2,h3,h4,h5,h6 {\r\n\t  margin: 0px;\r\n  }\r\n  \r\n  p {\r\n\t  font-family: Poppins-Regular;\r\n\t  font-size: 14px;\r\n\t  line-height: 1.7;\r\n\t  color: #666666;\r\n\t  margin: 0px;\r\n  }\r\n  \r\n  ul, li {\r\n\t  margin: 0px;\r\n\t  list-style-type: none;\r\n  }\r\n  \r\n\r\n  \r\n  textarea {\r\n\toutline: none;\r\n\tborder: none;\r\n  }\r\n  \r\n  textarea:focus, input:focus {\r\n\t/* border-color: transparent !important; */\r\n  }\r\n  \r\n  /* input:focus::-webkit-input-placeholder { color:transparent; }\r\n  input:focus:-moz-placeholder { color:transparent; }\r\n  input:focus::-moz-placeholder { color:transparent; }\r\n  input:focus:-ms-input-placeholder { color:transparent; }\r\n  \r\n  textarea:focus::-webkit-input-placeholder { color:transparent; }\r\n  textarea:focus:-moz-placeholder { color:transparent; }\r\n  textarea:focus::-moz-placeholder { color:transparent; }\r\n  textarea:focus:-ms-input-placeholder { color:transparent; }\r\n  \r\n  input::-webkit-input-placeholder { color: #999999;}\r\n  input:-moz-placeholder { color: #999999;}\r\n  input::-moz-placeholder { color: #999999;}\r\n  input:-ms-input-placeholder { color: #999999;}\r\n  \r\n  textarea::-webkit-input-placeholder { color: #999999;}\r\n  textarea:-moz-placeholder { color: #999999;}\r\n  textarea::-moz-placeholder { color: #999999;}\r\n  textarea:-ms-input-placeholder { color: #999999;} */\r\n  \r\n  \r\n  label {\r\n\tdisplay: block;\r\n\tmargin: 0;\r\n  }\r\n  \r\n  button {\r\n\t  outline: none !important;\r\n\t  border: none;\r\n\t  background: transparent;\r\n  }\r\n  \r\n  button:hover {\r\n\t  cursor: pointer;\r\n  }\r\n  \r\n  iframe {\r\n\t  border: none !important;\r\n  }\r\n  \r\n  /*  Text */\r\n  .txt1 {\r\n\tfont-family: Montserrat-Regular;\r\n\tfont-size: 13px;\r\n\tline-height: 1.4;\r\n\tcolor: #555555;\r\n  }\r\n  \r\n  .txt2 {\r\n\tfont-family: Montserrat-Regular;\r\n\tfont-size: 13px;\r\n\tline-height: 1.4;\r\n\tcolor: #999999;\r\n  }\r\n  \r\n  .text-center {\r\n\t  padding-top: 46px;\r\n\t  padding-bottom: 20px;\r\n  }\r\n  \r\n  \r\n  /* Size */\r\n  .size1 {\r\n\twidth: 355px;\r\n\tmax-width: 100%;\r\n  }\r\n  \r\n  .size2 {\r\n\twidth: calc(100% - 43px);\r\n  }\r\n  \r\n  /* Background */\r\n  .bg1 {background: #3b5998;}\r\n  .bg2 {background: #1da1f2;}\r\n  .bg3 {background: #cd201f;}\r\n  \r\n  \r\n  /* login */\r\n  .limiter {\r\n\twidth: 100%;\r\n\tmargin: 0 auto;\r\n  }\r\n  \r\n  .container-login {\r\n\twidth: 100%;  \r\n\tmin-height: 100vh;\r\n\tdisplay: -webkit-box;\r\n\tdisplay: -webkit-flex;\r\n\tdisplay: -moz-box;\r\n\tdisplay: -ms-flexbox;\r\n\tdisplay: flex;\r\n\tflex-wrap: wrap;\r\n\tjustify-content: center;\r\n\talign-items: center;\r\n\tbackground: #f2f2f2;\r\n  }\r\n  \r\n  \r\n  .wrap-login {\r\n\twidth: 100%;\r\n\tbackground: #fff;\r\n\toverflow: hidden;\r\n\tdisplay: -webkit-box;\r\n\tdisplay: -webkit-flex;\r\n\tdisplay: -moz-box;\r\n\tdisplay: -ms-flexbox;\r\n\tdisplay: flex;\r\n\tflex-wrap: wrap;\r\n\talign-items: stretch;\r\n\tflex-direction: row-reverse;\r\n  \r\n  }\r\n  \r\n  .login-more {\r\n\twidth: calc(100% - 700px);\r\n\tbackground-repeat: no-repeat;\r\n\tbackground-size: cover;\r\n\tbackground-position: center;\r\n\tposition: relative;\r\n\tz-index: 1;\r\n\tbackground-image: url(" + escape(__webpack_require__(/*! ./architecture.jpg */ "./resources/js/views/auth/assets/architecture.jpg")) + ");\r\n  }\r\n  \r\n  .login-more::before {\r\n\tcontent: \"\";\r\n\tdisplay: block;\r\n\tposition: absolute;\r\n\tz-index: -1;\r\n\twidth: 100%;\r\n\theight: 100%;\r\n\ttop: 0;\r\n\tleft: 0;\r\n\tbackground: rgba(0,0,0,0.1);\r\n  }\r\n  \r\n  \r\n  \r\n  .login-form {\r\n\twidth: 700px;\r\n\tmin-height: 100vh;\r\n\tdisplay: block;\r\n\tbackground-color: #f7f7f7;\r\n\tpadding: 70px 55px 55px 55px;\r\n  }\r\n  \r\n  .login-form-title {\r\n\twidth: 100%;\r\n\tpadding-bottom: 5px;\r\n\tdisplay: block;\r\n\tfont-family: Poppins-Regular;\r\n\tfont-size: 30px;\r\n\tcolor: #333333;\r\n\tline-height: 1.2;\r\n  }\r\n  \r\n  .label-name{\r\n\t  padding-bottom: 40px;\r\n  }\r\n  \r\n  \r\n  /* Input */\r\n  \r\n  .wrap-input {\r\n\tdisplay: -webkit-box;\r\n\tdisplay: -webkit-flex;\r\n\tdisplay: -moz-box;\r\n\tdisplay: -ms-flexbox;\r\n\tdisplay: flex;\r\n\tflex-wrap: wrap;\r\n\talign-items: flex-end;\r\n\twidth: 100%;\r\n\theight: 80px;\r\n\tposition: relative;\r\n\tborder: 1px solid #e6e6e6;\r\n\tborder-radius: 10px;\r\n\tmargin-bottom: 10px;\r\n  }\r\n  \r\n  .label-input {\r\n\tfont-family: Montserrat-Regular;\r\n\tfont-size: 18px;\r\n\tcolor: #999999;\r\n\tline-height: 1.2;\r\n  \r\n\tdisplay: block;\r\n\tposition: absolute;\r\n\tpointer-events: none;\r\n\twidth: 100%;\r\n\tpadding-left: 24px;\r\n\tleft: 0;\r\n\ttop: 30px;\r\n  \r\n\t-webkit-transition: all 0.4s;\r\n\t-o-transition: all 0.4s;\r\n\t-moz-transition: all 0.4s;\r\n\ttransition: all 0.4s;\r\n  }\r\n  \r\n  /* .input {\r\n\tdisplay: block;\r\n\twidth: 100%;\r\n\tbackground: transparent;\r\n\tfont-family: Montserrat-Regular;\r\n\tfont-size: 18px;\r\n\tcolor: #555555;\r\n\tline-height: 1.2;\r\n\tpadding: 0 26px;\r\n  }\r\n  \r\n  input.input {\r\n\theight: 100%;\r\n\t-webkit-transition: all 0.4s;\r\n\t-o-transition: all 0.4s;\r\n\t-moz-transition: all 0.4s;\r\n\ttransition: all 0.4s;\r\n  } */\r\n  \r\n  \r\n  .focus-input {\r\n\tposition: absolute;\r\n\tdisplay: block;\r\n\twidth: calc(100% + 2px);\r\n\theight: calc(100% + 2px);\r\n\ttop: -1px;\r\n\tleft: -1px;\r\n\tpointer-events: none;\r\n\tborder: 1px solid #6675df;\r\n\tborder-radius: 10px;\r\n  \r\n\tvisibility: hidden;\r\n\topacity: 0;\r\n  \r\n\t-webkit-transition: all 0.4s;\r\n\t-o-transition: all 0.4s;\r\n\t-moz-transition: all 0.4s;\r\n\ttransition: all 0.4s;\r\n  \r\n\t-webkit-transform: scaleX(1.1) scaleY(1.3);\r\n\t-moz-transform: scaleX(1.1) scaleY(1.3);\r\n\t-ms-transform: scaleX(1.1) scaleY(1.3);\r\n\t-o-transform: scaleX(1.1) scaleY(1.3);\r\n\ttransform: scaleX(1.1) scaleY(1.3);\r\n  }\r\n  \r\n  /* .input:focus + .focus-input {\r\n\tvisibility: visible;\r\n\topacity: 1;\r\n  \r\n\t-webkit-transform: scale(1);\r\n\t-moz-transform: scale(1);\r\n\t-ms-transform: scale(1);\r\n\t-o-transform: scale(1);\r\n\ttransform: scale(1);\r\n  } */\r\n  \r\n  .eff-focus-selection {\r\n\tvisibility: visible;\r\n\topacity: 1;\r\n  \r\n\t-webkit-transform: scale(1);\r\n\t-moz-transform: scale(1);\r\n\t-ms-transform: scale(1);\r\n\t-o-transform: scale(1);\r\n\ttransform: scale(1);\r\n  }\r\n  \r\n  /* .input:focus {\r\n\theight: 48px;\r\n  }\r\n  \r\n  .input:focus + .focus-input + .label-input {\r\n\ttop: 14px;\r\n\tfont-size: 13px;\r\n  } */\r\n  \r\n  .has-val {\r\n\theight: 48px !important;\r\n  }\r\n  \r\n  .has-val + .focus-input + .label-input {\r\n\ttop: 14px;\r\n\tfont-size: 13px;\r\n  }\r\n  \r\n  /* Restyle Checkbox */\r\n  \r\n  .input-checkbox {\r\n\tdisplay: none;\r\n  }\r\n  \r\n  .label-checkbox, .label-signup, .label-name {\r\n\tfont-family: Poppins-Regular;\r\n\tfont-size: 13px;\r\n\tcolor: #999999;\r\n\tline-height: 1.4;\r\n  \r\n\tdisplay: block;\r\n\tposition: relative;\r\n\tcursor: pointer;\r\n  }\r\n  .label-signup{\r\n\t  top: -50px;\r\n  }\r\n\r\n  .label-checkbox{\r\n\tpadding-left: 26px;\r\n  }\r\n  \r\n  .label-checkbox::before {\r\n\tcontent: \"\\F00C\";\r\n\tfont-family: FontAwesome;\r\n\tfont-size: 13px;\r\n\tcolor: transparent;\r\n  \r\n\tdisplay: -webkit-box;\r\n\tdisplay: -webkit-flex;\r\n\tdisplay: -moz-box;\r\n\tdisplay: -ms-flexbox;\r\n\tdisplay: flex;\r\n\tjustify-content: center;\r\n\talign-items: center;\r\n\tposition: absolute;\r\n\twidth: 18px;\r\n\theight: 18px;\r\n\tborder-radius: 2px;\r\n\tbackground: #fff;\r\n\tborder: 1px solid #6675df;\r\n\tleft: 0;\r\n\ttop: 50%;\r\n\t-webkit-transform: translateY(-50%);\r\n\t-moz-transform: translateY(-50%);\r\n\t-ms-transform: translateY(-50%);\r\n\t-o-transform: translateY(-50%);\r\n\ttransform: translateY(-50%);\r\n  }\r\n  \r\n  .input-checkbox:checked + .label-checkbox::before {\r\n\tcolor: #6675df;\r\n  }\r\n  \r\n  .flex-sb-m {\r\n\t  display: -webkit-box;\r\n\t  display: -webkit-flex;\r\n\t  display: -moz-box;\r\n\t  display: -ms-flexbox;\r\n\t  display: flex;\r\n\t  justify-content: space-between;\r\n\t  -ms-align-items: center;\r\n\t  align-items: center;\r\n\t  padding-top: 3px;\r\n\t  padding-bottom: 32px;\r\n  }\r\n  \r\n  \r\n  /* Button */\r\n  .container-login-form-btn {\r\n\twidth: 100%;\r\n\tdisplay: -webkit-box;\r\n\tdisplay: -webkit-flex;\r\n\tdisplay: -moz-box;\r\n\tdisplay: -ms-flexbox;\r\n\tdisplay: flex;\r\n\tflex-wrap: wrap;\r\n\tjustify-content: center;\r\n  }\r\n  \r\n  .login-form-btn {\r\n\tdisplay: -webkit-box;\r\n\tdisplay: -webkit-flex;\r\n\tdisplay: -moz-box;\r\n\tdisplay: -ms-flexbox;\r\n\tdisplay: flex;\r\n\tjustify-content: center;\r\n\talign-items: center;\r\n\tpadding: 0 20px;\r\n\twidth: 100%;\r\n\theight: 50px;\r\n\tborder-radius: 10px;\r\n\tbackground: hsl(233, 83%, 61%);\r\n    margin: 10px 0;\r\n\tfont-family: Montserrat-Bold;\r\n\tfont-size: 12px;\r\n\tcolor: #fff;\r\n\tline-height: 1.2;\r\n\t/* text-transform: uppercase; */\r\n\tletter-spacing: 1px;\r\n  \r\n\t-webkit-transition: all 0.4s;\r\n\t-o-transition: all 0.4s;\r\n\t-moz-transition: all 0.4s;\r\n\ttransition: all 0.4s;\r\n  }\r\n  \r\n  .login-form-btn:hover {\r\n\tbackground: #333333;\r\n  }\r\n  \r\n  \r\n  \r\n  /* Responsive */\r\n  \r\n  @media (max-width: 992px) {\r\n\t.login-form {\r\n\t  width: 50%;\r\n\t  padding-left: 30px;\r\n\t  padding-right: 30px;\r\n\t}\r\n  \r\n\t.login-more {\r\n\t  width: 50%;\r\n\t}\r\n  }\r\n  \r\n  @media (max-width: 768px) {\r\n\t.login-form {\r\n\t  width: 100%;\r\n\t}\r\n  \r\n\t.login-more {\r\n\t  display: none;\r\n\t}\r\n  }\r\n  \r\n  @media (max-width: 576px) {\r\n\t.login-form {\r\n\t  padding-left: 15px;\r\n\t  padding-right: 15px;\r\n\t  padding-top: 70px;\r\n\t}\r\n  }\r\n  \r\n  \r\n  /* Alert validate */\r\n  \r\n  .validate-input {\r\n\tposition: relative;\r\n  }\r\n  \r\n  .alert-validate::before {\r\n\tcontent: attr(data-validate);\r\n\tposition: absolute;\r\n\tz-index: 100;\r\n\tmax-width: 70%;\r\n\tbackground-color: #fff;\r\n\tborder: 1px solid #c80000;\r\n\tborder-radius: 2px;\r\n\tpadding: 4px 25px 4px 10px;\r\n\ttop: 50%;\r\n\t-webkit-transform: translateY(-50%);\r\n\t-moz-transform: translateY(-50%);\r\n\t-ms-transform: translateY(-50%);\r\n\t-o-transform: translateY(-50%);\r\n\ttransform: translateY(-50%);\r\n\tright: 12px;\r\n\tpointer-events: none;\r\n  \r\n\tfont-family: Poppins-Regular;\r\n\tcolor: #c80000;\r\n\tfont-size: 13px;\r\n\tline-height: 1.4;\r\n\ttext-align: left;\r\n  \r\n\tvisibility: hidden;\r\n\topacity: 0;\r\n  \r\n\t-webkit-transition: opacity 0.4s;\r\n\t-o-transition: opacity 0.4s;\r\n\t-moz-transition: opacity 0.4s;\r\n\ttransition: opacity 0.4s;\r\n  }\r\n  \r\n  .alert-validate::after {\r\n\tcontent: \"\\F12A\";\r\n\tfont-family: FontAwesome;\r\n\tdisplay: block;\r\n\tposition: absolute;\r\n\tz-index: 110;\r\n\tcolor: #c80000;\r\n\tfont-size: 16px;\r\n\ttop: 50%;\r\n\t-webkit-transform: translateY(-50%);\r\n\t-moz-transform: translateY(-50%);\r\n\t-ms-transform: translateY(-50%);\r\n\t-o-transform: translateY(-50%);\r\n\ttransform: translateY(-50%);\r\n\tright: 18px;\r\n  }\r\n  \r\n  .alert-validate:hover:before {\r\n\tvisibility: visible;\r\n\topacity: 1;\r\n  }\r\n  \r\n  @media (max-width: 992px) {\r\n\t.alert-validate::before {\r\n\t  visibility: visible;\r\n\t  opacity: 1;\r\n\t}\r\n  }\r\n  \r\n  \r\n  \r\n  /* Social */\r\n  .login-form-social-item {\r\n\twidth: 36px;\r\n\theight: 36px;\r\n\tfont-size: 18px;\r\n\tcolor: #fff;\r\n\tborder-radius: 50%;\r\n  }\r\n  \r\n  .login-form-social-item:hover {\r\n\tbackground: #333333;\r\n\tcolor: #fff;\r\n  }\r\n\r\n  \r\n  ", ""]);
+exports.push([module.i, "/* FONT */\r\n\r\n@font-face {\r\n\tfont-family: Poppins-Regular;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/poppins/Poppins-Regular.ttf */ "./resources/js/views/auth/assets/fonts/poppins/Poppins-Regular.ttf")) + "); \r\n  }\r\n  \r\n  @font-face {\r\n\tfont-family: Poppins-Medium;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/poppins/Poppins-Medium.ttf */ "./resources/js/views/auth/assets/fonts/poppins/Poppins-Medium.ttf")) + "); \r\n  }\r\n  \r\n  @font-face {\r\n\tfont-family: Poppins-Bold;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/poppins/Poppins-Bold.ttf */ "./resources/js/views/auth/assets/fonts/poppins/Poppins-Bold.ttf")) + "); \r\n  }\r\n  \r\n  @font-face {\r\n\tfont-family: Poppins-SemiBold;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/poppins/Poppins-SemiBold.ttf */ "./resources/js/views/auth/assets/fonts/poppins/Poppins-SemiBold.ttf")) + "); \r\n  }\r\n  \r\n  @font-face {\r\n\tfont-family: Montserrat-Bold;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/montserrat/Montserrat-Bold.ttf */ "./resources/js/views/auth/assets/fonts/montserrat/Montserrat-Bold.ttf")) + "); \r\n  }\r\n  \r\n  @font-face {\r\n\tfont-family: Montserrat-SemiBold;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/montserrat/Montserrat-SemiBold.ttf */ "./resources/js/views/auth/assets/fonts/montserrat/Montserrat-SemiBold.ttf")) + "); \r\n  }\r\n  \r\n  @font-face {\r\n\tfont-family: Montserrat-Regular;\r\n\tsrc: url(" + escape(__webpack_require__(/*! ./fonts/montserrat/Montserrat-Regular.ttf */ "./resources/js/views/auth/assets/fonts/montserrat/Montserrat-Regular.ttf")) + "); \r\n  }\r\n  \r\n  \r\n  /* RESTYLE TAG */\r\n  \r\n  * {\r\n\t  margin: 0px; \r\n\t  padding: 0px; \r\n\t  box-sizing: border-box;\r\n  }\r\n  \r\n  body, html {\r\n\t  height: 100%;\r\n\t  font-family: Poppins-Regular, sans-serif;\r\n  }\r\n  \r\n  a {\r\n\t  font-family: Poppins-Regular;\r\n\t  font-size: 14px;\r\n\t  line-height: 1.7;\r\n\t  color: #666666;\r\n\t  margin: 0px;\r\n\t  transition: all 0.4s;\r\n\t  -webkit-transition: all 0.4s;\r\n\t-o-transition: all 0.4s;\r\n\t-moz-transition: all 0.4s;\r\n  }\r\n  \r\n  a:focus {\r\n\t  outline: none !important;\r\n  }\r\n  \r\n  a:hover {\r\n\t  text-decoration: none;\r\n\tcolor: #6675df;\r\n  }\r\n  \r\n  h1,h2,h3,h4,h5,h6 {\r\n\t  margin: 0px;\r\n  }\r\n  \r\n  p {\r\n\t  font-family: Poppins-Regular;\r\n\t  font-size: 14px;\r\n\t  line-height: 1.7;\r\n\t  color: #666666;\r\n\t  margin: 0px;\r\n  }\r\n  \r\n  ul, li {\r\n\t  margin: 0px;\r\n\t  list-style-type: none;\r\n  }\r\n  \r\n\r\n  \r\n  textarea {\r\n\toutline: none;\r\n\tborder: none;\r\n  }\r\n  \r\n  textarea:focus, input:focus {\r\n\t/* border-color: transparent !important; */\r\n  }\r\n  \r\n  /* input:focus::-webkit-input-placeholder { color:transparent; }\r\n  input:focus:-moz-placeholder { color:transparent; }\r\n  input:focus::-moz-placeholder { color:transparent; }\r\n  input:focus:-ms-input-placeholder { color:transparent; }\r\n  \r\n  textarea:focus::-webkit-input-placeholder { color:transparent; }\r\n  textarea:focus:-moz-placeholder { color:transparent; }\r\n  textarea:focus::-moz-placeholder { color:transparent; }\r\n  textarea:focus:-ms-input-placeholder { color:transparent; }\r\n  \r\n  input::-webkit-input-placeholder { color: #999999;}\r\n  input:-moz-placeholder { color: #999999;}\r\n  input::-moz-placeholder { color: #999999;}\r\n  input:-ms-input-placeholder { color: #999999;}\r\n  \r\n  textarea::-webkit-input-placeholder { color: #999999;}\r\n  textarea:-moz-placeholder { color: #999999;}\r\n  textarea::-moz-placeholder { color: #999999;}\r\n  textarea:-ms-input-placeholder { color: #999999;} */\r\n  \r\n  \r\n  label {\r\n\tdisplay: block;\r\n\tmargin: 0;\r\n  }\r\n  \r\n  button {\r\n\t  outline: none !important;\r\n\t  border: none;\r\n\t  background: transparent;\r\n  }\r\n  \r\n  button:hover {\r\n\t  cursor: pointer;\r\n  }\r\n  \r\n  iframe {\r\n\t  border: none !important;\r\n  }\r\n  \r\n  /*  Text */\r\n  .txt1 {\r\n\tfont-family: Montserrat-Regular;\r\n\tfont-size: 13px;\r\n\tline-height: 1.4;\r\n\tcolor: #555555;\r\n  }\r\n  \r\n  .txt2 {\r\n\tfont-family: Montserrat-Regular;\r\n\tfont-size: 13px;\r\n\tline-height: 1.4;\r\n\tcolor: #999999;\r\n  }\r\n  \r\n  .text-center {\r\n\t  padding-top: 46px;\r\n\t  padding-bottom: 20px;\r\n  }\r\n  \r\n  \r\n  /* Size */\r\n  .size1 {\r\n\twidth: 355px;\r\n\tmax-width: 100%;\r\n  }\r\n  \r\n  .size2 {\r\n\twidth: calc(100% - 43px);\r\n  }\r\n  \r\n  /* Background */\r\n  .bg1 {background: #3b5998;}\r\n  .bg2 {background: #1da1f2;}\r\n  .bg3 {background: #cd201f;}\r\n  \r\n  \r\n  /* login */\r\n  .limiter {\r\n\twidth: 100%;\r\n\tmargin: 0 auto;\r\n  }\r\n  \r\n  .container-login {\r\n\twidth: 100%;  \r\n\tmin-height: 100vh;\r\n\tdisplay: -webkit-box;\r\n\tdisplay: -webkit-flex;\r\n\tdisplay: -moz-box;\r\n\tdisplay: -ms-flexbox;\r\n\tdisplay: flex;\r\n\tflex-wrap: wrap;\r\n\tjustify-content: center;\r\n\talign-items: center;\r\n\tbackground: #f2f2f2;\r\n  }\r\n  \r\n  \r\n  .wrap-login {\r\n\twidth: 100%;\r\n\tbackground: #fff;\r\n\toverflow: hidden;\r\n\tdisplay: -webkit-box;\r\n\tdisplay: -webkit-flex;\r\n\tdisplay: -moz-box;\r\n\tdisplay: -ms-flexbox;\r\n\tdisplay: flex;\r\n\tflex-wrap: wrap;\r\n\talign-items: stretch;\r\n\tflex-direction: row-reverse;\r\n  \r\n  }\r\n  \r\n  .login-more {\r\n\twidth: calc(100% - 700px);\r\n\tbackground-repeat: no-repeat;\r\n\tbackground-size: cover;\r\n\tbackground-position: center;\r\n\tposition: relative;\r\n\tz-index: 1;\r\n\tbackground-image: url(" + escape(__webpack_require__(/*! ./architecture.jpg */ "./resources/js/views/auth/assets/architecture.jpg")) + ");\r\n  }\r\n  \r\n  .login-more::before {\r\n\tcontent: \"\";\r\n\tdisplay: block;\r\n\tposition: absolute;\r\n\tz-index: -1;\r\n\twidth: 100%;\r\n\theight: 100%;\r\n\ttop: 0;\r\n\tleft: 0;\r\n\tbackground: rgba(0,0,0,0.1);\r\n  }\r\n  \r\n  \r\n  \r\n  .login-form {\r\n\twidth: 700px;\r\n\tmin-height: 100vh;\r\n\tdisplay: block;\r\n\tbackground-color: #f7f7f7;\r\n\tpadding: 70px 55px 55px 55px;\r\n  }\r\n  \r\n  .login-form-title {\r\n\twidth: 100%;\r\n\tpadding-bottom: 5px;\r\n\tdisplay: block;\r\n\tfont-family: Poppins-Regular;\r\n\tfont-size: 30px;\r\n\tcolor: #333333;\r\n\tline-height: 1.2;\r\n  }\r\n  \r\n  .label-name{\r\n\t  padding-bottom: 40px;\r\n  }\r\n  \r\n  \r\n  /* Input */\r\n  \r\n  .wrap-input {\r\n\tdisplay: -webkit-box;\r\n\tdisplay: -webkit-flex;\r\n\tdisplay: -moz-box;\r\n\tdisplay: -ms-flexbox;\r\n\tdisplay: flex;\r\n\tflex-wrap: wrap;\r\n\talign-items: flex-end;\r\n\twidth: 100%;\r\n\theight: 80px;\r\n\tposition: relative;\r\n\tborder: 1px solid #e6e6e6;\r\n\tborder-radius: 10px;\r\n\tmargin-bottom: 10px;\r\n  }\r\n  \r\n  .label-input {\r\n\tfont-family: Montserrat-Regular;\r\n\tfont-size: 18px;\r\n\tcolor: #999999;\r\n\tline-height: 1.2;\r\n  \r\n\tdisplay: block;\r\n\tposition: absolute;\r\n\tpointer-events: none;\r\n\twidth: 100%;\r\n\tpadding-left: 24px;\r\n\tleft: 0;\r\n\ttop: 30px;\r\n  \r\n\t-webkit-transition: all 0.4s;\r\n\t-o-transition: all 0.4s;\r\n\t-moz-transition: all 0.4s;\r\n\ttransition: all 0.4s;\r\n  }\r\n  \r\n  /* .input {\r\n\tdisplay: block;\r\n\twidth: 100%;\r\n\tbackground: transparent;\r\n\tfont-family: Montserrat-Regular;\r\n\tfont-size: 18px;\r\n\tcolor: #555555;\r\n\tline-height: 1.2;\r\n\tpadding: 0 26px;\r\n  }\r\n  \r\n  input.input {\r\n\theight: 100%;\r\n\t-webkit-transition: all 0.4s;\r\n\t-o-transition: all 0.4s;\r\n\t-moz-transition: all 0.4s;\r\n\ttransition: all 0.4s;\r\n  } */\r\n  \r\n  \r\n  .focus-input {\r\n\tposition: absolute;\r\n\tdisplay: block;\r\n\twidth: calc(100% + 2px);\r\n\theight: calc(100% + 2px);\r\n\ttop: -1px;\r\n\tleft: -1px;\r\n\tpointer-events: none;\r\n\tborder: 1px solid #6675df;\r\n\tborder-radius: 10px;\r\n  \r\n\tvisibility: hidden;\r\n\topacity: 0;\r\n  \r\n\t-webkit-transition: all 0.4s;\r\n\t-o-transition: all 0.4s;\r\n\t-moz-transition: all 0.4s;\r\n\ttransition: all 0.4s;\r\n  \r\n\t-webkit-transform: scaleX(1.1) scaleY(1.3);\r\n\t-moz-transform: scaleX(1.1) scaleY(1.3);\r\n\t-ms-transform: scaleX(1.1) scaleY(1.3);\r\n\t-o-transform: scaleX(1.1) scaleY(1.3);\r\n\ttransform: scaleX(1.1) scaleY(1.3);\r\n  }\r\n  \r\n  /* .input:focus + .focus-input {\r\n\tvisibility: visible;\r\n\topacity: 1;\r\n  \r\n\t-webkit-transform: scale(1);\r\n\t-moz-transform: scale(1);\r\n\t-ms-transform: scale(1);\r\n\t-o-transform: scale(1);\r\n\ttransform: scale(1);\r\n  } */\r\n  \r\n  .eff-focus-selection {\r\n\tvisibility: visible;\r\n\topacity: 1;\r\n  \r\n\t-webkit-transform: scale(1);\r\n\t-moz-transform: scale(1);\r\n\t-ms-transform: scale(1);\r\n\t-o-transform: scale(1);\r\n\ttransform: scale(1);\r\n  }\r\n  \r\n  /* .input:focus {\r\n\theight: 48px;\r\n  }\r\n  \r\n  .input:focus + .focus-input + .label-input {\r\n\ttop: 14px;\r\n\tfont-size: 13px;\r\n  } */\r\n  \r\n  .has-val {\r\n\theight: 48px !important;\r\n  }\r\n  \r\n  .has-val + .focus-input + .label-input {\r\n\ttop: 14px;\r\n\tfont-size: 13px;\r\n  }\r\n  \r\n  /* Restyle Checkbox */\r\n  \r\n  .input-checkbox {\r\n\tdisplay: none;\r\n  }\r\n  \r\n  .label-checkbox, .label-signup, .label-name {\r\n\tfont-family: Poppins-Regular;\r\n\tfont-size: 13px;\r\n\tcolor: #999999;\r\n\tline-height: 1.4;\r\n  \r\n\tdisplay: block;\r\n\tposition: relative;\r\n\tcursor: pointer;\r\n  }\r\n  .label-signup{\r\n\t  top: -50px;\r\n  }\r\n\r\n  .label-checkbox{\r\n\tpadding-left: 26px;\r\n  }\r\n  \r\n  .label-checkbox::before {\r\n\tcontent: \"\\F00C\";\r\n\tfont-family: FontAwesome;\r\n\tfont-size: 13px;\r\n\tcolor: transparent;\r\n  \r\n\tdisplay: -webkit-box;\r\n\tdisplay: -webkit-flex;\r\n\tdisplay: -moz-box;\r\n\tdisplay: -ms-flexbox;\r\n\tdisplay: flex;\r\n\tjustify-content: center;\r\n\talign-items: center;\r\n\tposition: absolute;\r\n\twidth: 18px;\r\n\theight: 18px;\r\n\tborder-radius: 2px;\r\n\tbackground: #fff;\r\n\tborder: 1px solid #6675df;\r\n\tleft: 0;\r\n\ttop: 50%;\r\n\t-webkit-transform: translateY(-50%);\r\n\t-moz-transform: translateY(-50%);\r\n\t-ms-transform: translateY(-50%);\r\n\t-o-transform: translateY(-50%);\r\n\ttransform: translateY(-50%);\r\n  }\r\n  \r\n  .input-checkbox:checked + .label-checkbox::before {\r\n\tcolor: #6675df;\r\n  }\r\n  \r\n  .flex-sb-m {\r\n\t  display: -webkit-box;\r\n\t  display: -webkit-flex;\r\n\t  display: -moz-box;\r\n\t  display: -ms-flexbox;\r\n\t  display: flex;\r\n\t  justify-content: space-between;\r\n\t  -ms-align-items: center;\r\n\t  align-items: center;\r\n\t  padding-top: 3px;\r\n\t  padding-bottom: 32px;\r\n  }\r\n  \r\n  \r\n  /* Button */\r\n  .container-login-form-btn {\r\n\twidth: 100%;\r\n\tdisplay: -webkit-box;\r\n\tdisplay: -webkit-flex;\r\n\tdisplay: -moz-box;\r\n\tdisplay: -ms-flexbox;\r\n\tdisplay: flex;\r\n\tflex-wrap: wrap;\r\n\tjustify-content: center;\r\n  }\r\n  \r\n  .login-form-btn {\r\n\tdisplay: -webkit-box;\r\n\tdisplay: -webkit-flex;\r\n\tdisplay: -moz-box;\r\n\tdisplay: -ms-flexbox;\r\n\tdisplay: flex;\r\n\tjustify-content: center;\r\n\talign-items: center;\r\n\tpadding: 0 20px;\r\n\twidth: 100%;\r\n\theight: 50px;\r\n\tborder-radius: 10px;\r\n\tbackground: hsl(233, 83%, 61%);\r\n    margin: 10px 0;\r\n\tfont-family: Montserrat-Bold;\r\n\tfont-size: 12px;\r\n\tcolor: #fff;\r\n\tline-height: 1.2;\r\n\t/* text-transform: uppercase; */\r\n\tletter-spacing: 1px;\r\n  \r\n\t-webkit-transition: all 0.4s;\r\n\t-o-transition: all 0.4s;\r\n\t-moz-transition: all 0.4s;\r\n\ttransition: all 0.4s;\r\n  }\r\n  \r\n  .login-form-btn:hover {\r\n\tbackground: #333333;\r\n  }\r\n  \r\n  \r\n  \r\n  /* Responsive */\r\n  \r\n  @media (max-width: 992px) {\r\n\t.login-form {\r\n\t  width: 50%;\r\n\t  padding-left: 30px;\r\n\t  padding-right: 30px;\r\n\t}\r\n  \r\n\t.login-more {\r\n\t  width: 50%;\r\n\t}\r\n  }\r\n  \r\n  @media (max-width: 768px) {\r\n\t.login-form {\r\n\t  width: 100%;\r\n\t}\r\n  \r\n\t.login-more {\r\n\t  display: none;\r\n\t}\r\n  }\r\n  \r\n  @media (max-width: 576px) {\r\n\t.login-form {\r\n\t  padding-left: 15px;\r\n\t  padding-right: 15px;\r\n\t  padding-top: 70px;\r\n\t}\r\n  }\r\n  \r\n  \r\n  /* Alert validate */\r\n  \r\n  .validate-input {\r\n\tposition: relative;\r\n  }\r\n  \r\n  .alert-validate::before {\r\n\tcontent: attr(data-validate);\r\n\tposition: absolute;\r\n\tz-index: 100;\r\n\tmax-width: 70%;\r\n\tbackground-color: #fff;\r\n\tborder: 1px solid #c80000;\r\n\tborder-radius: 2px;\r\n\tpadding: 4px 25px 4px 10px;\r\n\ttop: 50%;\r\n\t-webkit-transform: translateY(-50%);\r\n\t-moz-transform: translateY(-50%);\r\n\t-ms-transform: translateY(-50%);\r\n\t-o-transform: translateY(-50%);\r\n\ttransform: translateY(-50%);\r\n\tright: 12px;\r\n\tpointer-events: none;\r\n  \r\n\tfont-family: Poppins-Regular;\r\n\tcolor: #c80000;\r\n\tfont-size: 13px;\r\n\tline-height: 1.4;\r\n\ttext-align: left;\r\n  \r\n\tvisibility: hidden;\r\n\topacity: 0;\r\n  \r\n\t-webkit-transition: opacity 0.4s;\r\n\t-o-transition: opacity 0.4s;\r\n\t-moz-transition: opacity 0.4s;\r\n\ttransition: opacity 0.4s;\r\n  }\r\n  \r\n  .alert-validate::after {\r\n\tcontent: \"\\F12A\";\r\n\tfont-family: FontAwesome;\r\n\tdisplay: block;\r\n\tposition: absolute;\r\n\tz-index: 110;\r\n\tcolor: #c80000;\r\n\tfont-size: 16px;\r\n\ttop: 50%;\r\n\t-webkit-transform: translateY(-50%);\r\n\t-moz-transform: translateY(-50%);\r\n\t-ms-transform: translateY(-50%);\r\n\t-o-transform: translateY(-50%);\r\n\ttransform: translateY(-50%);\r\n\tright: 18px;\r\n  }\r\n  \r\n  .alert-validate:hover:before {\r\n\tvisibility: visible;\r\n\topacity: 1;\r\n  }\r\n  \r\n  @media (max-width: 992px) {\r\n\t.alert-validate::before {\r\n\t  visibility: visible;\r\n\t  opacity: 1;\r\n\t}\r\n  }\r\n  \r\n  \r\n  \r\n  /* Social */\r\n  .login-form-social-item {\r\n\twidth: 36px;\r\n\theight: 36px;\r\n\tfont-size: 18px;\r\n\tcolor: #fff;\r\n\tborder-radius: 50%;\r\n  }\r\n  \r\n  .login-form-social-item:hover {\r\n\tbackground: #333333;\r\n\tcolor: #fff;\r\n  }\r\n\r\n  .select-org {\r\n\tposition: relative;\r\n\twidth: 100%;\r\n\tmargin: 15px auto;\r\n  \r\n\tel-select , el-input{\r\n\t  width: 100%;\r\n\t  padding: 10px 5px 10px 40px;\r\n\t  display: block;\r\n\t  border: 2px solid #cecbcb;\r\n\t  border-radius: 4px;\r\n\t  transition: 0.2s ease-out;\r\n\t  background-color: #f7f7f7;\r\n\t  color: darken(#ededed, 30%);\r\n\t}\r\n\t.el-icon-office-building {\r\n\t  padding: 10px 0;\r\n\t  font-size: 20px;\r\n\t}\r\n\t.el-icon-office-building:focus {\r\n\t  color: #2c50f1;\r\n\t}\r\n  }\r\n  input.el-input__inner {\r\n\tbackground-color: #f7f7f7 !important;\r\n\tpadding: 20px 20px;\r\n  }\r\n  \r\n  .el-input.is-active .el-input__inner,\r\n  .el-input__inner:focus {\r\n\tborder-color: #409eff;\r\n\tcolor: #409EFF;\r\n  }\r\n  \r\n  .el-select .el-input__inner {\r\n\tfont-size: 14px;\r\n\tfont-weight: 300;\r\n  }\r\n  h5 {\r\n\tpadding-bottom: 10px;\r\n  }\r\n  \r\n  .login-more {\r\n\tdisplay: flex;\r\n\tjustify-content: center;\r\n\talign-items: center;\r\n  }\r\n  \r\n  .login-more .copy {\r\n\tcolor: white;\r\n\ttext-align: center;\r\n\t-webkit-font-smoothing: antialiased;\r\n\t-moz-osx-font-smoothing: grayscale;\r\n  }\r\n  .login-more h1 {\r\n\tfont-weight: 700;\r\n\tfont-size: 4rem;\r\n\tmargin: 30px 0;\r\n  }\r\n  .login-more p {\r\n\tfont-weight: 500;\r\n\tcolor: white;\r\n\tmargin: 20px 0;\r\n\tfont-size: 1.5rem;\r\n  }\r\n  \r\n  .img-org {\r\n\tdisplay: flex;\r\n\tmargin: 10px 0;\r\n  }\r\n  \r\n  .img-org p {\r\n\tpadding: 15px 5px;\r\n  }\r\n  \r\n  .circle-image {\r\n\tdisplay: inline-block;\r\n\tborder-radius: 50%;\r\n\toverflow: hidden;\r\n\twidth: 50px;\r\n\theight: 50px;\r\n  }\r\n  .circle-image img {\r\n\twidth: 100%;\r\n\theight: 100%;\r\n\tobject-fit: cover;\r\n  }\r\n  \r\n  .login-info{\r\n\tmargin: 20px 0;\r\n\tlabel{\r\n\t  font-size: 12px;\r\n\t}\r\n  }\r\n  \r\n  .el-input__icon .el-icon-view{\r\n\tcursor: pointer;\r\n  }\r\n\r\n  \r\n  ", ""]);
 
 // exports
 
@@ -65284,7 +67158,7 @@ var render = function() {
       _c("div", { staticClass: "wrap-login" }, [
         _vm.isSubmited == false
           ? _c(
-              "form",
+              "div",
               { staticClass: "login-form validate-form" },
               [
                 _vm._m(0),
@@ -65308,16 +67182,15 @@ var render = function() {
                       remote: "",
                       "reserve-keyword": "",
                       placeholder: "",
-                      "remote-method": _vm.remoteMethod,
                       loading: _vm.loading,
                       required: ""
                     },
                     model: {
-                      value: _vm.value,
+                      value: _vm.login.organization,
                       callback: function($$v) {
-                        _vm.value = $$v
+                        _vm.$set(_vm.login, "organization", $$v)
                       },
-                      expression: "value"
+                      expression: "login.organization"
                     }
                   },
                   [
@@ -65354,109 +67227,126 @@ var render = function() {
               ],
               1
             )
-          : _c("form", { staticClass: "login-form validate-form" }, [
-              _vm._m(1),
-              _vm._v(" "),
-              _c("span", { staticClass: "login-form-title" }, [
-                _vm._v("\n          Hello, Welcome Back\n        ")
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "label-name" }, [
-                _vm._v("\n          Sign in if you have an account\n        ")
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "img-org" }, [
-                _vm._m(2),
+          : _c(
+              "div",
+              {
+                ref: "login",
+                staticClass: "login-form validate-form",
+                attrs: { rules: _vm.loginRules }
+              },
+              [
+                _vm._m(1),
                 _vm._v(" "),
-                _c("p", [_vm._v(_vm._s(_vm.value))])
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "login-info" }, [
-                _c(
-                  "div",
-                  { staticClass: "email" },
-                  [
-                    _c("label", { attrs: { for: "E-mail Address" } }, [
-                      _vm._v("E-mail Address")
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "el-input",
-                      {
-                        staticClass: "select-org",
-                        attrs: {
-                          placeholder: "Example40@gmail.com",
-                          required: ""
-                        },
-                        model: {
-                          value: _vm.login.email,
-                          callback: function($$v) {
-                            _vm.$set(_vm.login, "email", $$v)
-                          },
-                          expression: "login.email"
-                        }
-                      },
-                      [
-                        _c("i", {
-                          staticClass: "el-input__icon el-icon-message",
-                          attrs: { slot: "prefix" },
-                          slot: "prefix"
-                        })
-                      ]
-                    )
-                  ],
-                  1
-                ),
+                _c("span", { staticClass: "login-form-title" }, [
+                  _vm._v("\n          Hello, Welcome Back\n        ")
+                ]),
                 _vm._v(" "),
-                _c(
-                  "div",
-                  { staticClass: "password" },
-                  [
-                    _c("label", { attrs: { for: "password" } }, [
-                      _vm._v("Password")
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "el-input",
-                      {
-                        staticClass: "select-org",
-                        attrs: {
-                          type: "password",
-                          placeholder: "****************",
-                          required: ""
-                        },
-                        model: {
-                          value: _vm.login.password,
-                          callback: function($$v) {
-                            _vm.$set(_vm.login, "password", $$v)
+                _c("div", { staticClass: "label-name" }, [
+                  _vm._v("\n          Sign in if you have an account\n        ")
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "img-org" }, [
+                  _vm._m(2),
+                  _vm._v(" "),
+                  _c("p", [_vm._v(_vm._s(_vm.login.organization))])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "login-info" }, [
+                  _c(
+                    "div",
+                    { staticClass: "email" },
+                    [
+                      _c("label", { attrs: { for: "E-mail Address" } }, [
+                        _vm._v("E-mail Address")
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "el-input",
+                        {
+                          staticClass: "select-org",
+                          attrs: {
+                            placeholder: "Example40@gmail.com",
+                            required: ""
                           },
-                          expression: "login.password"
-                        }
-                      },
-                      [
-                        _c("i", {
-                          staticClass: "el-input__icon el-icon-lock",
-                          attrs: { slot: "prefix" },
-                          slot: "prefix"
-                        }),
-                        _vm._v(" "),
-                        _c("i", {
-                          staticClass: "el-input__icon el-icon-view",
-                          attrs: { slot: "suffix" },
-                          on: { click: _vm.showPassword },
-                          slot: "suffix"
-                        })
-                      ]
-                    )
-                  ],
-                  1
-                )
-              ]),
-              _vm._v(" "),
-              _vm._m(3)
-            ]),
+                          model: {
+                            value: _vm.login.email,
+                            callback: function($$v) {
+                              _vm.$set(_vm.login, "email", $$v)
+                            },
+                            expression: "login.email"
+                          }
+                        },
+                        [
+                          _c("i", {
+                            staticClass: "el-input__icon el-icon-message",
+                            attrs: { slot: "prefix" },
+                            slot: "prefix"
+                          })
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "password" },
+                    [
+                      _c("label", { attrs: { for: "password" } }, [
+                        _vm._v("Password")
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "el-input",
+                        {
+                          staticClass: "select-org",
+                          attrs: {
+                            type: "password",
+                            placeholder: "****************",
+                            required: ""
+                          },
+                          model: {
+                            value: _vm.login.password,
+                            callback: function($$v) {
+                              _vm.$set(_vm.login, "password", $$v)
+                            },
+                            expression: "login.password"
+                          }
+                        },
+                        [
+                          _c("i", {
+                            staticClass: "el-input__icon el-icon-lock",
+                            attrs: { slot: "prefix" },
+                            slot: "prefix"
+                          }),
+                          _vm._v(" "),
+                          _c("i", {
+                            staticClass: "el-input__icon el-icon-view",
+                            attrs: { slot: "suffix" },
+                            on: { click: _vm.showPwd },
+                            slot: "suffix"
+                          })
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "container-login-form-btn" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "login-form-btn",
+                      on: { click: _vm.handleLogin }
+                    },
+                    [_vm._v("\n            Login\n          ")]
+                  )
+                ])
+              ]
+            ),
         _vm._v(" "),
-        _vm._m(4)
+        _vm._m(3)
       ])
     ])
   ])
@@ -65486,16 +67376,6 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("span", { staticClass: "circle-image" }, [
       _c("img", { attrs: { src: __webpack_require__(/*! ./assets/image.jpg */ "./resources/js/views/auth/assets/image.jpg") } })
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "container-login-form-btn" }, [
-      _c("button", { staticClass: "login-form-btn" }, [
-        _vm._v("\n            Login\n          ")
-      ])
     ])
   },
   function() {
@@ -81141,10 +83021,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var element_ui__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(element_ui__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var element_ui_lib_theme_chalk_index_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! element-ui/lib/theme-chalk/index.css */ "./node_modules/element-ui/lib/theme-chalk/index.css");
 /* harmony import */ var element_ui_lib_theme_chalk_index_css__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(element_ui_lib_theme_chalk_index_css__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_5__);
 
 
 
 
+
+
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(axios__WEBPACK_IMPORTED_MODULE_5___default.a); // axios.defaults.baseURL = `${process.env.MIX_BASE_API}`
 
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(element_ui__WEBPACK_IMPORTED_MODULE_3___default.a, {
   size: 'small',
@@ -81564,6 +83449,78 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/views/utils/validate.js":
+/*!**********************************************!*\
+  !*** ./resources/js/views/utils/validate.js ***!
+  \**********************************************/
+/*! exports provided: isExternal, validURL, validLowerCase, validUpperCase, validAlphabets, validEmail */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isExternal", function() { return isExternal; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "validURL", function() { return validURL; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "validLowerCase", function() { return validLowerCase; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "validUpperCase", function() { return validUpperCase; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "validAlphabets", function() { return validAlphabets; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "validEmail", function() { return validEmail; });
+/* All validations should be defined here */
+function isExternal(path) {
+  return /^(https?:|mailto:|tel:)/.test(path);
+}
+/**
+ * Validate a valid URL
+ * @param {String} textval
+ * @return {Boolean}
+ */
+
+function validURL(url) {
+  var reg = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
+  return reg.test(url);
+}
+/**
+ * Validate a full-lowercase string
+ * @return {Boolean}
+ * @param {String} str
+ */
+
+function validLowerCase(str) {
+  var reg = /^[a-z]+$/;
+  return reg.test(str);
+}
+/**
+ * Validate a full-uppercase string
+ * @return {Boolean}
+ * @param {String} str
+ */
+
+function validUpperCase(str) {
+  var reg = /^[A-Z]+$/;
+  return reg.test(str);
+}
+/**
+ * Check if a string contains only alphabet
+ * @param {String} str
+ * @param {Boolean}
+ */
+
+function validAlphabets(str) {
+  var reg = /^[A-Za-z]+$/;
+  return reg.test(str);
+}
+/**
+ * Validate an email address
+ * @param {String} email
+ * @return {Boolean}
+ */
+
+function validEmail(email) {
+  var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(email);
+}
+
+/***/ }),
+
 /***/ "./resources/sass/app.scss":
 /*!*********************************!*\
   !*** ./resources/sass/app.scss ***!
@@ -81571,7 +83528,7 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-throw new Error("Module build failed (from ./node_modules/css-loader/index.js):\nModuleBuildError: Module build failed (from ./node_modules/sass-loader/dist/cjs.js):\nSassError: Can't find stylesheet to import.\n  ╷\n8 │ @import '~bootstrap/scss/bootstrap';\r\n  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  ╵\n  E:\\Stage 1A\\oprnizeV2\\resources\\sass\\app.scss 8:9  root stylesheet\n    at E:\\Stage 1A\\oprnizeV2\\node_modules\\webpack\\lib\\NormalModule.js:316:20\n    at E:\\Stage 1A\\oprnizeV2\\node_modules\\loader-runner\\lib\\LoaderRunner.js:367:11\n    at E:\\Stage 1A\\oprnizeV2\\node_modules\\loader-runner\\lib\\LoaderRunner.js:233:18\n    at context.callback (E:\\Stage 1A\\oprnizeV2\\node_modules\\loader-runner\\lib\\LoaderRunner.js:111:13)\n    at E:\\Stage 1A\\oprnizeV2\\node_modules\\sass-loader\\dist\\index.js:73:7\n    at Function.call$2 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:96202:16)\n    at render_closure1.call$2 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:82137:12)\n    at _RootZone.runBinary$3$3 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:28242:18)\n    at _FutureListener.handleError$1 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:26764:21)\n    at _Future__propagateToListeners_handleError.call$0 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:27071:49)\n    at Object._Future__propagateToListeners (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:12117:77)\n    at _Future._completeError$2 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:26917:9)\n    at _AsyncAwaitCompleter.completeError$2 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:26576:12)\n    at Object._asyncRethrow (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:11920:17)\n    at E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:15763:20\n    at _wrapJsFunctionForAsync_closure.$protected (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:11945:15)\n    at _wrapJsFunctionForAsync_closure.call$2 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:26595:12)\n    at _awaitOnObject_closure0.call$2 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:26589:25)\n    at _RootZone.runBinary$3$3 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:28242:18)\n    at _FutureListener.handleError$1 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:26764:21)\n    at _Future__propagateToListeners_handleError.call$0 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:27071:49)\n    at Object._Future__propagateToListeners (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:12117:77)\n    at _Future._completeError$2 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:26917:9)\n    at _AsyncAwaitCompleter.completeError$2 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:26576:12)\n    at Object._asyncRethrow (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:11920:17)\n    at E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:21237:20\n    at _wrapJsFunctionForAsync_closure.$protected (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:11945:15)\n    at _wrapJsFunctionForAsync_closure.call$2 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:26595:12)\n    at _awaitOnObject_closure0.call$2 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:26589:25)\n    at _RootZone.runBinary$3$3 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:28242:18)\n    at _FutureListener.handleError$1 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:26764:21)\n    at _Future__propagateToListeners_handleError.call$0 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:27071:49)\n    at Object._Future__propagateToListeners (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:12117:77)\n    at _Future._completeError$2 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:26917:9)\n    at _AsyncAwaitCompleter.completeError$2 (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:26576:12)\n    at Object._asyncRethrow (E:\\Stage 1A\\oprnizeV2\\node_modules\\sass\\sass.dart.js:11920:17)");
+// removed by extract-text-webpack-plugin
 
 /***/ }),
 
