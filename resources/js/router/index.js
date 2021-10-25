@@ -19,8 +19,8 @@ import Review from '../views/Review.vue'
 
 
 
-// import Login from "../views/Login.vue";
-// import Register from "../views/Register.vue";
+import Login from "../views/auth/Login.vue";
+import Signup from "../views/auth/Signup.vue";
 
 const routes = [
   {
@@ -33,16 +33,6 @@ const routes = [
         name: "dashboard",
         components: { default: Dashboard },
       },
-  //     {
-  //       path: "/icons",
-  //       name: "icons",
-  //       components: { default: Icons },
-  //     },
-  //     {
-  //       path: "/maps",
-  //       name: "maps",
-  //       components: { default: Maps },
-  //     },
       {
         path: "/AddNewEmployee",
         name: "AddNewEmployee",
@@ -79,32 +69,18 @@ const routes = [
         path: "/Employees",
         name: "Employees",
         components: { default: Employees },
-        // children: [
-        //       {
-        //         path: "add",
-        //         name: "AddNewEmployee",
-        //         components: { default: AddNewEmployee },
-        //       },
-        //     ],
       },
     ],
-  // },
-  // {
-  //   path: "/",
-  //   redirect: "login",
-  //   component: AuthLayout,
-  //   children: [
-  //     {
-  //       path: "/login",
-  //       name: "login",
-  //       components: { default: Login },
-  //     },
-  //     {
-  //       path: "/register",
-  //       name: "register",
-  //       components: { default: Register },
-  //     },
-  //   ],
+  },
+  {
+    path: "/Login",
+    name: "Login",
+    components: { default: Login },
+  },
+  {
+    path: "/Signup",
+    name: "Signup",
+    components: { default: Signup },
   },
 ];
 
