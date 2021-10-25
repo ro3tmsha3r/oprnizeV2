@@ -76,8 +76,7 @@
                     <el-radio-button @change="check" label="Custome"></el-radio-button>
                     </el-radio-group>
                     <div v-if="customeIsChecked == true">
-                      hello
-                    <base-slider disabled="false" type="number" :range="{min: 1, max: 90}" v-model="sliders.slider1"></base-slider>
+                    <base-slider :value="[1]" :options="{tooltips: true, pips: true}" :range="{min: 1, max: 90}" v-model="sliders.slider1"></base-slider>
                     </div>
                 </div>
               </div>
@@ -126,7 +125,7 @@ export default {
       ],
       customeIsChecked: false,
       sliders: {
-              slider1: 0
+              slider1: 1
            }
     };
   },

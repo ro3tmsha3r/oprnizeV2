@@ -35,7 +35,7 @@ const GlobalComponents = {
     app.component("base-switch", BaseSwitch);
     app.component("base-radio", BaseRadio);
     app.component("base-table", BaseTable);
-    app.component("base-table", BaseSlider);
+    app.component("base-slider", BaseSlider);
     app.component("card", Card);
     app.component("modal", Modal);
     // app.component("stats-card", StatsCard);

@@ -25435,7 +25435,7 @@ __webpack_require__.r(__webpack_exports__);
       countries: ["Saudi Arabian", "Egyptian", "Saudi Arabian", "Egyptian", "Saudi Arabian", "Egyptian", "Saudi Arabian", "Egyptian"],
       customeIsChecked: false,
       sliders: {
-        slider1: 0
+        slider1: 1
       }
     };
   },
@@ -28260,6 +28260,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       /* PROPS */
       , ["modelValue"]), $data.customeIsChecked == true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_43, [_hoisted_44, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_base_slider, {
         disabled: "false",
+        value: "number",
         type: "number",
         range: {
           min: 1,
@@ -29094,16 +29095,13 @@ var _hoisted_31 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 var _hoisted_32 = {
   key: 0
 };
-
-var _hoisted_33 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" hello ");
-
-var _hoisted_34 = {
+var _hoisted_33 = {
   "class": "text-right"
 };
 
-var _hoisted_35 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Next");
+var _hoisted_34 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Next");
 
-var _hoisted_36 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Save");
+var _hoisted_35 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Save");
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_el_radio_button = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("el-radio-button");
@@ -29242,9 +29240,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
       }, 8
       /* PROPS */
-      , ["modelValue"]), $data.customeIsChecked == true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_32, [_hoisted_33, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_base_slider, {
-        disabled: "false",
-        type: "number",
+      , ["modelValue"]), $data.customeIsChecked == true ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_32, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_base_slider, {
+        value: [1],
+        options: {
+          tooltips: true,
+          pips: true
+        },
         range: {
           min: 1,
           max: 90
@@ -29255,7 +29256,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         })
       }, null, 8
       /* PROPS */
-      , ["modelValue"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_34, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
+      , ["modelValue"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_33, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
         to: "/AddNewEmployee/Compinsation"
       }, {
         "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
@@ -29264,7 +29265,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
             type: "default"
           }, {
             "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-              return [_hoisted_35];
+              return [_hoisted_34];
             }),
             _: 1
             /* STABLE */
@@ -29282,7 +29283,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
             type: "primary"
           }, {
             "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-              return [_hoisted_36];
+              return [_hoisted_35];
             }),
             _: 1
             /* STABLE */
@@ -31039,7 +31040,7 @@ var GlobalComponents = {
     app.component("base-switch", _components_BaseSwitch_vue__WEBPACK_IMPORTED_MODULE_10__["default"]);
     app.component("base-radio", _components_BaseRadio_vue__WEBPACK_IMPORTED_MODULE_11__["default"]);
     app.component("base-table", _components_BaseTable_vue__WEBPACK_IMPORTED_MODULE_12__["default"]);
-    app.component("base-table", _components_BaseSlider_vue__WEBPACK_IMPORTED_MODULE_13__["default"]);
+    app.component("base-slider", _components_BaseSlider_vue__WEBPACK_IMPORTED_MODULE_13__["default"]);
     app.component("card", _components_Card_vue__WEBPACK_IMPORTED_MODULE_14__["default"]);
     app.component("modal", _components_Modal_vue__WEBPACK_IMPORTED_MODULE_15__["default"]); // app.component("stats-card", StatsCard);
 

@@ -109,7 +109,7 @@
                     </el-radio-group>
                     <div v-if="customeIsChecked == true">
                       hello
-                    <base-slider disabled="false" type="number" :range="{min: 1, max: 90}" v-model="sliders.slider1"></base-slider>
+                    <base-slider disabled="false" value="number" type="number" :range="{min: 1, max: 90}" v-model="sliders.slider1"></base-slider>
                     </div>
                 </div>
               </div>
