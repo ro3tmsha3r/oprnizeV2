@@ -1,18 +1,12 @@
-import Vue from 'vue';
-import App from './views/App';
-import router from './router';
-import Element from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css';
-import axios from 'axios'
+import { createApp } from 'vue'
+import router from "./router";
+import App from './views/App'
+import ArgonDashboard from "./plugins/argon-dashboard";
+import ElementPlus from 'element-plus'
+import "element-plus/lib/theme-chalk/index.css";
 
-Vue.use(axios)
-// axios.defaults.baseURL = `${process.env.MIX_BASE_API}`
-
-Vue.use(Element,{size: 'small', zIndex: 3000 })
-
-new Vue({
-  el: '#app',
-  router,
-  render: h => h(App),
-});
-
+const app = createApp(App)
+app.use(router);
+app.use(ElementPlus);
+app.use(ArgonDashboard);
+app.mount('#app')
