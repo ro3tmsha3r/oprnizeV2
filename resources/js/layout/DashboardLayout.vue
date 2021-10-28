@@ -6,54 +6,92 @@
       title="Argon"
     >
       <template v-slot:links>
+        <h5 class="navbar-heading pl-2 text-black font-weight-800 text-capitalize text-md-left">General</h5>
         <sidebar-item
           :link="{
-            name: 'Dashboard',
-            icon: 'ni ni-tv-2 text-primary',
-            path: '/dashboard',
+            name: 'Home',
+            icon: 'fa fa-home',
+            path: '/Home',
           }"
         />
-
+        <h5 class="navbar-heading pl-2 text-black font-weight-800 text-capitalize text-md-left">Employees</h5>
         <sidebar-item
           :link="{
-            name: 'Icons',
-            icon: 'ni ni-planet text-blue',
-            path: '/icons',
-          }"
-        />
-        <sidebar-item
-          :link="{
-            name: 'Maps',
-            icon: 'ni ni-pin-3 text-orange',
-            path: '/maps',
+            name: 'Employees',
+            icon: 'fa fa-users',
+            path: '/Employees',
           }"
         />
         <sidebar-item
           :link="{
-            name: 'User Profile',
-            icon: 'ni ni-single-02 text-yellow',
-            path: '/profile',
+            name: 'Requests',
+            icon: 'ni ni-ungroup',
+            path: '/AddNewEmployee',
           }"
         />
         <sidebar-item
           :link="{
-            name: 'Tables',
-            icon: 'ni ni-bullet-list-67 text-red',
-            path: '/tables',
+            name: 'Structure',
+            icon: 'fa fa-sitemap',
+            path: '/Structure',
           }"
         />
         <sidebar-item
           :link="{
-            name: 'Login',
-            icon: 'ni ni-key-25 text-info',
-            path: '/login',
+            name: 'Employees Services',
+            icon: 'ni ni-ui-04',
+            path: '/EmployeesServices',
           }"
         />
         <sidebar-item
           :link="{
-            name: 'Register',
-            icon: 'ni ni-circle-08 text-pink',
-            path: '/register',
+            name: 'Employees Violations',
+            icon: 'fa fa-exclamation-triangle',
+            path: '/EmployeesViolations',
+          }"
+        />
+        <h5 class="navbar-heading pl-2 text-black font-weight-800 text-capitalize text-md-left">Attendance</h5>
+        <sidebar-item
+          :link="{
+            name: 'Shifts',
+            icon: 'ni ni-time-alarm',
+            path: '/Shifts',
+          }"
+        />
+        <sidebar-item
+          :link="{
+            name: 'Time Sheet',
+            icon: 'ni ni-single-copy-04',
+            path: '/TimeSheet',
+          }"
+        />
+        <sidebar-item
+          :link="{
+            name: 'Vacations',
+            icon: 'ni ni-calendar-grid-58',
+            path: '/Vacations',
+          }"
+        />
+        <h5 class="navbar-heading pl-2 text-black font-weight-800 text-capitalize text-md-left">Payroll</h5>
+        <sidebar-item
+          :link="{
+            name: 'Payroll Table',
+            icon: 'ni ni-money-coins',
+            path: '/PayrollTable',
+          }"
+        />
+        <sidebar-item
+          :link="{
+            name: 'Transactions',
+            icon: 'ni ni-money-coins',
+            path: '/Transactions',
+          }"
+        />
+        <sidebar-item
+          :link="{
+            name: 'Payment Processing',
+            icon: 'fa fa-tasks',
+            path: '/PaymentProcessing',
           }"
         />
       </template>

@@ -11,18 +11,22 @@
           </h3>
         </div>
         <div class="col text-right">
-          <base-button type="primary" icon="ni ni-fat-add" size="md"> <router-link to="/AddNewEmployee"> Add New Employee </router-link></base-button>
+          <router-link to="/AddNewEmployee" class="text-white"
+            ><base-button type="primary" icon="ni ni-fat-add" size="md">
+              Add New Employee</base-button
+            ></router-link
+          >
         </div>
       </div>
     </div>
-
+    <!-- Oprnize -->
     <div class="table-responsive">
       <base-table
         class="table align-items-center table-flush"
         :class="type === 'dark' ? 'table-dark' : ''"
         :thead-classes="type === 'dark' ? 'thead-dark' : 'thead-light'"
         tbody-classes="list"
-        :data="tableData"
+        :data="employees"
       >
         <template v-slot:columns>
           <th>Job Number</th>
@@ -36,35 +40,38 @@
         </template>
 
         <template v-slot:default="row">
-          <td class="budget">
-            {{ row.item.JobNumber }}
+          <td class="budget text-center">
+            {{ row.item.job_number }}
           </td>
-          <th scope="row">
+          <th scope="row" class="text-center">
             <div class="media align-items-center">
               <a href="#" class="avatar rounded-circle mr-3">
                 <img alt="Image placeholder" :src="row.item.img" />
               </a>
+
               <div class="media-body">
-                <span class="name mb-0 text-sm">{{ row.item.Employee }}</span>
+                <span class="name mb-0 text-sm"
+                  ><a>{{ row.item.name.en }}</a></span
+                >
               </div>
             </div>
           </th>
-          <td>
-            {{ row.item.JobTitle }}
+          <td class="text-center">
+            {{ row.item.job_title }}
           </td>
-          
-          <td class="budget">
+
+          <td class="budget text-center">
             {{ row.item.Department }}
           </td>
 
-          <td>
-              {{ row.item.Location }}
+          <td class="text-center">
+            {{ row.item.Location }}
           </td>
-          <td>
-            {{ row.item.JoiningDate }}
+          <td class="text-center">
+            {{ row.item.contract_start_date }}
           </td>
-          <td>
-            {{ row.item.IDIqama }}
+          <td class="text-center">
+            {{ row.item.user_id }}
           </td>
           <td class="text-right">
             <base-dropdown class="dropdown" position="right">
@@ -80,23 +87,30 @@
                 </a>
               </template>
 
-                <a class="dropdown-item" href="#"> <i class="fa fa-pencil-square-o"></i>Edit</a>
-                <a class="dropdown-item" href="#">End</a>
+              <a class="dropdown-item" href="#">
+                <i class="fa fa-pencil-square-o"></i>Edit</a
+              >
+              <a class="dropdown-item" href="#">End</a>
             </base-dropdown>
           </td>
         </template>
+        
       </base-table>
     </div>
-
     <div
       class="card-footer d-flex justify-content-end"
       :class="type === 'dark' ? 'bg-transparent' : ''"
     >
-      <base-pagination total="30"></base-pagination>
+      <base-pagination 
+        :per-page="10"
+        :total="employees.length"
+        >
+      </base-pagination>
     </div>
   </div>
 </template>
 <script>
+import axios from "axios";
 export default {
   name: "projects-table",
   props: {
@@ -107,59 +121,25 @@ export default {
   },
   data() {
     return {
-      tableData: [
-        {
-          JobNumber: '1',
-          img: "img/theme/bootstrap.jpg",
-          Employee: "Muhammed Ahmed",
-          JobTitle: "HR Manager",
-          Department: 'HR',
-          Location: 'Riyadh',
-          JoiningDate: '22/12/2018',
-          IDIqama: '123456789',
-        },
-        {
-          JobNumber: '2',
-          img: "img/theme/angular.jpg",
-          Employee: "Muhammed Ahmed",
-          JobTitle: "HR Manager",
-          Department: 'HR',
-          Location: 'Riyadh',
-          JoiningDate: '22/12/2018',
-          IDIqama: '123456789',
-        },
-        {
-          JobNumber: '3',
-          img: "img/theme/sketch.jpg",
-          Employee: "Muhammed Ahmed",
-          JobTitle: "HR Manager",
-          Department: 'HR',
-          Location: 'Riyadh',
-          JoiningDate: '22/12/2018',
-          IDIqama: '123456789',
-        },
-        {
-          JobNumber: '4',
-          img: "img/theme/react.jpg",
-          Employee: "Muhammed Ahmed",
-          JobTitle: "HR Manager",
-          Department: 'HR',
-          Location: 'Riyadh',
-          JoiningDate: '22/12/2018',
-          IDIqama: '123456789',
-        },
-        {
-          JobNumber: '5',
-          img: "img/theme/vue.jpg",
-          Employee: "Muhammed Ahmed",
-          JobTitle: "HR Manager",
-          Department: 'HR',
-          Location: 'Riyadh',
-          JoiningDate: '22/12/2018',
-          IDIqama: '123456789',
-        },
-      ],
+      employees: [],
     };
+  },
+  mounted() {
+    this.getEmployees();
+  },
+  methods: {
+    getEmployees: function () {
+      var app = this;
+      axios
+        .get("/employee")
+        .then(function (response) {
+          app.employees = response.data;
+          console.log(app.employees);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
   },
 };
 </script>

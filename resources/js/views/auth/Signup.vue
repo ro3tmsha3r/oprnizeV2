@@ -3,7 +3,7 @@
     <div class="container-login">
       <div class="wrap-login">
         <!-- Sign Up -->
-        <form class="login-form validate-form">
+        <form @submit.prevent="handleSignUp" class="login-form validate-form">
           <div class="label-signup">
             You already have an account? <strong><router-link to='/login'>Login</router-link></strong>
           </div>
@@ -17,7 +17,7 @@
             <div class="username">
               <label for="E-mail Address">Username</label>
               <el-input 
-                v-model="signup.email" 
+                v-model="signup.username" 
                 class="select-org" 
                 required
               >
@@ -38,7 +38,7 @@
             <div class="domain">
               <label for="domain">Domain</label>
               <el-input 
-                v-model="signup.email" 
+                v-model="signup.domain" 
                 class="select-org" 
                 placeholder="example.opernize.com"
                 required
@@ -93,7 +93,7 @@
 </template>
 <script>
 import "./assets/main";
-// import "element-ui";
+import axios from "axios";
 export default {
   name: "signup",
   data() {
@@ -115,6 +115,16 @@ export default {
       this.isSubmited = true;
       console.log(orgName);
     },
+    async handleSignUp(){
+      const response = await axios.post('register', {
+        name: this.signup.username,
+        email: this.signup.email,
+        domain: this.signup.domain,
+        password: this.signup.password,
+        confirmPassword: this.signup.confirmPassword,
+      })
+      console.log(response)
+    }
   },
 };
 </script>

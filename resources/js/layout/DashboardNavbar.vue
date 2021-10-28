@@ -1,8 +1,8 @@
 <template>
   <base-nav
-    class="navbar-top navbar-dark"
+    class="fixed top-0 inset-x-0 z-50 h-16 text-white bg-white"
     id="navbar-main"
-    :show-toggle-button="true"
+    :show-toggle-button="false"
     expand
   >
     <form

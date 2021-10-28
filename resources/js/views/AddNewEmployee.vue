@@ -1,16 +1,18 @@
 <template>
   <div>
-    <base-header type="white" class="pb-2 pb-2 pt-5 pt-md-6"> </base-header>
-    <div class="container-fluid">
-      <nav class="navbar navbar-vertical navbar-light bg-white add-Employe">
+    <!-- <base-header type="white" class="pb-2 pb-2 pt-5 pt-md-6"> </base-header> -->
+    <div class="row">
+      <div class="bg-white col-lg-2 ml-3 pl-0 pr-0" style="min-width: 200px;">
+      <nav class="navbar navbar-vertical justify-content-center">
         <div class="">
           <!-- Employees -->
           <h6 class="navbar-heading text-muted">Employees</h6>
           <!--Navigation-->
+          <div class="employee-info">
           <ul class="navbar-nav smb-md-3">
             <li class="nav-item">
               <router-link class="nav-link" to="/AddNewEmployee/PersonalInfo">
-                <i class="ni ni-spaceship"></i> 
+                <i class="fa fa-id-card"></i> 
                 <span> Personal Info </span>
               </router-link>
             </li>
@@ -18,7 +20,7 @@
           <ul class="navbar-nav smb-md-3">
             <li class="nav-item">
               <router-link class="nav-link" to="/AddNewEmployee/DepartmentInfo">
-                <i class="ni ni-spaceship"></i> 
+                <i class="ni ni-building"></i> 
                 <span> Department Info </span>
               </router-link>
             </li>
@@ -26,7 +28,7 @@
           <ul class="navbar-nav smb-md-3">
             <li class="nav-item">
               <router-link class="nav-link" to="/AddNewEmployee/JobInformation">
-                <i class="ni ni-spaceship"></i> 
+                <i class="ni ni-briefcase-24"></i> 
                 <span> Job Information </span>
               </router-link>
             </li>
@@ -34,7 +36,7 @@
           <ul class="navbar-nav smb-md-3">
             <li class="nav-item">
               <router-link class="nav-link" to="/AddNewEmployee/Compinsation">
-                <i class="ni ni-spaceship"></i> 
+                <i class="ni ni-money-coins"></i> 
                 <span> Compinsation </span>
               </router-link>
             </li>
@@ -47,17 +49,16 @@
               </router-link>
             </li>
           </ul>
+          </div>
         </div>
       </nav>
+      </div>
+      <div class="col-lg-9 pt-3">
+      <router-view></router-view>
+     </div>
+    </div>
+         
         
-    
-    </div>
-    <div class="container-fluid">
-        <div class="col">
-          <router-view></router-view>
-        </div>
-      <!-- </div> -->
-    </div>
   </div>
 </template>
 

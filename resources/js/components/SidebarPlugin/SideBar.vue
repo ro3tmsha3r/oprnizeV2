@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="navbar navbar-vertical fixed-left navbar-expand-md bg-white"
+    class="navbar navbar-vertical fixed-left navbar-expand-md navbar-light bg-white"
     id="sidenav-main"
   >
     <div class="container-fluid">
@@ -94,119 +94,9 @@
             </div>
           </div>
         </div>
-        <!-- <ul class="navbar-nav">
+
+        <ul class="navbar-nav">
           <slot name="links"> </slot>
-        </ul> -->
-        <!-- General -->
-        <h6 class="navbar-heading text-muted">General</h6>
-        <!--Navigation-->
-        <ul class="navbar-nav smb-md-3">
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="#"
-            >
-              <i class="ni ni-spaceship"></i> Home
-            </a>
-          </li>
-        </ul>
-
-        <!--Employees-->
-        <h6 class="navbar-heading text-muted">Employees</h6>
-        <!--Navigation-->
-        <ul class="navbar-nav smb-md-3">
-          <li class="nav-item">
-            <router-link
-              to = "/Employees"
-              class="nav-link"
-            >
-              <i class="ni ni-spaceship"></i> Employees
-            </router-link>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="#"
-            >
-              <i class="ni ni-palette"></i> Requests
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="#"
-            >
-              <i class="ni ni-ui-04"></i> Structure
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="#"
-            >
-              <i class="ni ni-ui-04"></i> Employees Services
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="#"
-            >
-              <i class="ni ni-ui-04"></i> Employees Violations
-            </a>
-          </li>
-        </ul>
-
-        <!--Attendance-->
-        <h6 class="navbar-heading text-muted">Attendance</h6>
-        <!--Navigation-->
-        <ul class="navbar-nav smb-md-3">
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="#"
-            >
-              <i class="ni ni-spaceship"></i> Shifts
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="#"
-            >
-              <i class="ni ni-palette"></i> Time Sheet
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="#"
-            >
-              <i class="ni ni-ui-04"></i> Vacations
-            </a>
-          </li>
-        </ul>
-
-        <!--Payroll-->
-        <h6 class="navbar-heading text-muted">Payroll</h6>
-        <!--Navigation-->
-        <ul class="navbar-nav smb-md-3">
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="#"
-            >
-              <i class="ni ni-spaceship"></i> Payroll Table
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="#"
-            >
-              <i class="ni ni-palette"></i> Payment Processing
-            </a>
-          </li>
         </ul>
         <!--Divider-->
         <hr class="my-3" />
@@ -216,7 +106,7 @@
               class="nav-link"
               href="#"
             >
-              <i class="ni ni-spaceship"></i> Reports
+              <i class="ni ni-collection"></i> Reports
             </a>
           </li>
           <li class="nav-item">
@@ -224,17 +114,16 @@
               class="nav-link"
               href="#"
             >
-              <i class="ni ni-palette"></i> Settings
+              <i class="fa fa-cogs"></i> Settings
             </a>
           </li>
         </ul>
-
       </div>
     </div>
   </nav>
 </template>
 <script>
-import NavbarToggleButton from "../../components/NavbarToggleButton.vue";
+import NavbarToggleButton from "../../components/NavbarToggleButton";
 
 export default {
   name: "sidebar",

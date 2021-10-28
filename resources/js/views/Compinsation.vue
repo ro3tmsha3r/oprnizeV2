@@ -1,9 +1,9 @@
 <template>
-  <div>
-    <div class="container-fluid mt--7">
+  <div  class="p-2">
+    <!-- <div class="container-fluid mt--7">
       <div class="w-96 mt-8 ml-9">
-        <div class="col-xl-8 order-xl-1">
-          <card shadow type="secondary">
+        <div class="col-xl-8 order-xl-1"> -->
+          <card class="card-info" shadow type="secondary">
             <template v-slot:header>
               <div class="bg-white border-0">
                 <div class="row align-items-center">
@@ -19,18 +19,18 @@
 
             <form>
               <div class="row">
-                <div class="col-lg-4">
+                <div class="col-lg-6">
                   <base-input
                     alternative=""
                     label="Basic"
                     input-classes="form-control-alternative"
-                    v-model="model.branch"
+                    v-model="compinsation.basic"
                     required
                   />
                 </div>
-                <div class="col-lg-4">
-                  <label>Probation Period</label> <br>
-                    <el-radio-group v-model="model.email" size="medium">
+                <div class="col-lg-6">
+                  <label>Allowences</label> <br>
+                    <el-radio-group v-model="compinsation.Allowences" size="medium">
                     <el-radio-button label="25% Hosing Allowance"></el-radio-button>
                     <el-radio-button label="10% Transportation"></el-radio-button>
                     <el-radio-button label="Custome"></el-radio-button>
@@ -38,9 +38,9 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-lg-4">
+                <div class="col-lg-12">
                   <label>Leave Balance</label> <br>
-                    <el-radio-group v-model="model.email" size="medium">
+                    <el-radio-group v-model="compinsation.leaveBalance" size="medium">
                     <el-radio-button label="21"></el-radio-button>
                     <el-radio-button label="30"></el-radio-button>
                     <el-radio-button label="Custome"></el-radio-button>
@@ -48,9 +48,9 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-lg-4">
+                <div class="col-lg-12">
                   <label>Payment Method</label> <br>
-                    <el-radio-group v-model="model.email" size="medium">
+                    <el-radio-group v-model="compinsation.paymentMethod" size="medium">
                     <el-radio-button label="Cash"></el-radio-button>
                     <el-radio-button label="Bank Deposit"></el-radio-button>
                     <el-radio-button label="Cheque"></el-radio-button>
@@ -58,20 +58,20 @@
                     </el-radio-group>
                 </div>
               </div>
-              <div class="pl-lg-4">
+              <div class="pl-lg-12">
                 <div class="row">
-                  <div class="col-lg-4">
+                  <div class="col-lg-6">
                     <base-input
                       alternative=""
                       label="IBAN"
                       input-classes="form-control-alternative"
-                      v-model="model.branch"
+                      v-model="compinsation.IBAN"
                       required
                     />
                   </div>
-                  <div class="col-lg-4">
+                  <div class="col-lg-6">
                     <label>Bank Name</label> <br />
-                    <el-radio-group v-model="model.gender" size="medium">
+                    <el-radio-group v-model="compinsation.bankName" size="medium">
                       <el-radio-button label="Cash"></el-radio-button>
                       <el-radio-button label="Bank Deposit"></el-radio-button>
                       <el-radio-button label="Cheque"></el-radio-button>
@@ -80,61 +80,28 @@
                   </div>
                 </div>
               </div>
-              <div class="pl-lg-4">
-                <div class="row">
-                  <div class="col-lg-4">
-                    <label>Contract Type</label> <br>
-                    <el-radio-group v-model="model.city" size="medium">
-                    <el-radio-button label="Full Time"></el-radio-button>
-                    <el-radio-button label="Part Time"></el-radio-button>
-                    <el-radio-button label="Remotely"></el-radio-button>
-                    </el-radio-group>
-                  </div>
-                  <div class="col-lg-4">
-                    <label>Employment Type</label> <br>
-                    <el-radio-group v-model="model.username" size="medium">
-                    <el-radio-button label="Limited"></el-radio-button>
-                    <el-radio-button label="Unlimited"></el-radio-button>
-                    </el-radio-group>
-                  </div>
-                </div> 
-              </div>
-              <div class="row">
-                <div class="col-lg-4">
-                  <label>Probation Period</label> <br>
-                    <el-radio-group v-model="model.about" size="medium">
-                    <el-radio-button label="90 days"></el-radio-button>
-                    <el-radio-button label="180 days"></el-radio-button>
-                    <el-radio-button @change="check" label="Custome"></el-radio-button>
-                    </el-radio-group>
-                    <div v-if="customeIsChecked == true">
-                      hello
-                    <base-slider disabled="false" value="number" type="number" :range="{min: 1, max: 90}" v-model="sliders.slider1"></base-slider>
-                    </div>
-                </div>
-              </div>
               <div class="text-left">
-                <router-link to="/AddNewEmployee/JobInformation"
-                  ><base-button class="mr-2" type="secondary"
-                    >Back</base-button
-                  ></router-link
-                >
+                <router-link to="/AddNewEmployee/JobInformation">
+                <base-button class="mr-2" type="secondary">
+                  Back
+                </base-button>
+                </router-link>
               </div>
               <div class="text-right">
-                <router-link to="/AddNewEmployee/Review"
-                  ><base-button class="mr-2" type="default"
-                    >Next</base-button
-                  ></router-link
-                >
-                <router-link to="/AddNewEmployee/Review"
-                  ><base-button type="primary">Save</base-button></router-link
-                >
+                <router-link to="/AddNewEmployee/Review">
+                <base-button class="mr-2" type="default">
+                Next
+                </base-button>
+                </router-link>
+                <!-- <router-link to="/AddNewEmployee/Review"> -->
+                <base-button @click="compinsationInfo(compinsation)" type="primary">Save</base-button>
+                <!-- </router-link> -->
               </div>
             </form>
           </card>
-        </div>
+        <!-- </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 <script>
@@ -142,31 +109,18 @@ export default {
   name: "Compinsation",
   data() {
     return {
-      model: {
-        username: "",
-        email: "",
-        firstName: "",
-        lastName: "",
-        address: "",
-        city: "",
-        country: [],
-        zipCode: "",
-        about: "",
+      compinsation: {
+        basic: "",
+        Allowences: "",
+        leaveBalance: "",
+        paymentMethod: "",
+        bankName: "",
+        IBAN: "",
       },
-      countries: [
-        "Saudi Arabian",
-        "Egyptian",
-        "Saudi Arabian",
-        "Egyptian",
-        "Saudi Arabian",
-        "Egyptian",
-        "Saudi Arabian",
-        "Egyptian",
-      ],
       customeIsChecked: false,
       sliders: {
-              slider1: 0
-           }
+        slider1: 0
+      }
     };
   },
   methods:{
@@ -174,12 +128,26 @@ export default {
       console.log(yes);
       this.customeIsChecked = true;
       console.log(this.customeIsChecked)
+    },
+    compinsationInfo(data) {
+      console.log('test')
+      this.$store.state.employees.push(
+        {
+        basic: data.basic,
+        Allowences: data.Allowences,
+        leaveBalance: data.leaveBalance,
+        paymentMethod: data.paymentMethod,
+        bankName: data.bankName,
+        IBAN: data.IBAN,
+        }
+      );
+      this.$router.push({path: '/AddNewEmployee/Review'})
     }
   }
 };
 </script>
-<style>
-.card {
-  width: 800px;
+<style scoped>
+.card-info {
+  min-width: 375px;
 }
 </style>

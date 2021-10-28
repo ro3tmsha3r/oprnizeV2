@@ -14,25 +14,17 @@
             Enter your organization name
           </div>
           <h5>Organization Name</h5>
-          <el-select
-            v-model="login.organization"
-            filterable
-            remote
-            reserve-keyword
-            placeholder=""
-            :loading="loading"
-            class="select-org"
-            required
-          >
-            <el-option
-              v-for="item in states"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            >
-            </el-option>
-            <i slot="prefix" class="el-icon-office-building"></i>
-          </el-select>
+          <div class="email">
+              <label for="NameOrg">Organization Name</label>
+              <el-input
+                v-model="login.organization"
+                class="select-org"
+                placeholder=""
+                required
+              >
+                <i class="fa-envelope-o"></i>
+              </el-input>
+            </div>
           <div class="container-login-form-btn">
             <button @click="submitName(value)" class="login-form-btn">
               Submit
@@ -41,7 +33,7 @@
         </div>
 
         <!-- Login -->
-        <div v-else ref="login" :rules="loginRules" class="login-form validate-form">
+        <form v-else ref="login" :rules="loginRules" class="login-form validate-form">
           <div class="label-signup">
             You don't have an account? <strong><router-link to='/Signup'>Sign Up</router-link></strong>
           </div>
@@ -66,7 +58,7 @@
                 placeholder="Example40@gmail.com"
                 required
               >
-                <i slot="prefix" class="el-input__icon el-icon-message"></i>
+                <i class="fa-envelope-o"></i>
               </el-input>
             </div>
             <div class="password">
@@ -78,10 +70,9 @@
                 placeholder="****************"
                 required
               >
-                <i slot="prefix" class="el-input__icon el-icon-lock"></i>
+                <i class="fa-lock "></i>
                 <i
                   @click="showPwd"
-                  slot="suffix"
                   class="el-input__icon el-icon-view"
                 ></i>
               </el-input>
@@ -92,11 +83,11 @@
               Login
             </button>
           </div>
-        </div>
+        </form>
 
         <div class="login-more" style="">
           <section class="copy">
-            <h1>Logo Here</h1>
+            <h1 class="text-white">Logo Here</h1>
             <p>Opernize</p>
             <p>Towards a digital transformation</p>
           </section>
@@ -107,15 +98,16 @@
 </template>
 <script>
 import "./assets/main";
-// import "element-ui";
+import 'element-plus'
+import 'element-plus/lib/theme-chalk/index.css'
 import axios from "axios";
 import {useRouter} from "vue-router";
+import {message} from 'element-plus'
 // import { validEmail } from "../utils/validate";
 
 export default {
   name: "login",
   data() {
-    const router = useRouter();
     const validateEmail = (rule, value, callback) => {
       if (!validEmail(value)) {
         callback(new Error("Please enter the correct email"));
@@ -136,6 +128,7 @@ export default {
         password: "",
         organization: "",
       },
+      value2: 0,
       rememberMe: false,
       loginRules: {
         email: [{ required: true, trigger: "blur", validator: validateEmail }],
@@ -149,16 +142,23 @@ export default {
       options: [],
       value: [],
       list: [],
-      states: [
-        {
-          label: "Alabama",
-          value: "Alabama",
-        },
-        {
-          label: "Fordeal",
-          value: "Fordeal",
-        },
-      ],
+      states: [{
+          value: 'Alabama',
+          label: 'Alabama'
+        }, {
+          value: 'Fordeal',
+          label: 'Fordeal'
+        }, {
+          value: 'Option3',
+          label: 'Option3'
+        }, {
+          value: 'Option4',
+          label: 'Option4'
+        }, {
+          value: 'Option5',
+          label: 'Option5'
+        }],
+      router: useRouter(),
     };
   },
   methods: {
@@ -173,27 +173,25 @@ export default {
         this.pwdType = "password";
       }
     },
-    handleLogin() {
-      this.loading = true;
-      axios
-        .post("/login", { login: this.login, remember: this.rememberMe })
-        .then((response) => {
-          this.$message({
+    async handleLogin() {
+      await axios.post('login', {
+        email: this.login.email,
+        password: this.login.password,
+      })
+      .then(() => {
+        this.$message({
             showClose: true,
             message: "Welcome " + this.login.email,
             type: "success",
           });
-          router.push({
-            path: "/",
-          });
-        })
-        .catch((err) => {
-          this.loading = false;
+        this.$router.push({path: '/Home'})
+      })
+      .catch((err) => {
           if (err.response.status == 422) {
             console.log(err.response, "incorrect Email or password");
             this.$message({
               showClose: true,
-              message: "The given data was invalid.",
+              message: "Incorrect Email or password.",
               type: "error",
             });
           } else {
@@ -204,8 +202,12 @@ export default {
               type: "error",
             });
           }
-        });
+      });
     },
+
+        
+
+
   },
 };
 </script>
