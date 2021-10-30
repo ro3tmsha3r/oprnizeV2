@@ -9,6 +9,7 @@ import Dashboard from "../views/Dashboard.vue";
 // import Profile from "../views/UserProfile.vue";
 import Employees from "../views/Employees.vue";
 import PayrollTable from "../views/PayrollTable.vue"
+import Transactions from "../views/Transactions.vue"
 import AddNewEmployee from '../views/AddNewEmployee.vue'
 import personalInfo from '../views/personalInfo.vue'
 import DepartmentInfo from '../views/DepartmentInfo.vue'
@@ -26,7 +27,7 @@ import Signup from "../views/auth/Signup.vue";
 const routes = [
   {
     path: "/dashboard",
-    redirect: "/dashboard",
+    redirect: "/home",
     component: DashboardLayout,
     children: [
       {
@@ -76,12 +77,17 @@ const routes = [
         name: "PayrollTable",
         components: { default: PayrollTable },
       },
+      {
+        path: "/Transactions",
+        name: "Transactions",
+        components: { default: Transactions },
+      },
     ],
   },
   {
     path: "/",
     name: "Login",
-    redirect: "/login",
+    // redirect: "/login",
     component: Login,
     children: [
       {

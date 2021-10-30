@@ -13,7 +13,7 @@
           :to="$route.path"
           class="h4 mb-0 text-blueGray-700 text-uppercase d-none d-lg-inline-block"
         >
-          {{ $route.name }}
+          <!-- {{ $route.name }} -->
         </router-link>
       </slot>
       <navbar-toggle-button
@@ -26,7 +26,7 @@
       </navbar-toggle-button>
 
       <div
-        class="collapse navbar-collapse"
+        class="collapse navbar-collapse justify-content-lg-between"
         :class="{ show: toggled }"
         :id="contentId"
         v-click-outside="closeMenu"

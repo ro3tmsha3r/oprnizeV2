@@ -8,7 +8,7 @@
       <navbar-toggle-button @click="showSidebar">
         <span class="navbar-toggler-icon"></span>
       </navbar-toggle-button>
-      <router-link class="navbar-brand" to="/">
+      <router-link class="navbar-brand" to="/Home">
         <img :src="logo" class="navbar-brand-img" alt="..." />
       </router-link>
 
@@ -83,7 +83,7 @@
         <div class="navbar-collapse-header d-md-none">
           <div class="row">
             <div class="col-6 collapse-brand">
-              <router-link to="/">
+              <router-link to="/Home">
                 <img :src="logo" />
               </router-link>
             </div>

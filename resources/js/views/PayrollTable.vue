@@ -1,6 +1,6 @@
 <template>
   <div>
-    <base-header type="gradient-success" class="pb-6 pb-8 pt-5 pt-md-8">
+    <!-- <base-header type="gradient-success" class="pb-6 pb-8 pt-5 pt-md-8"> -->
       <!-- Card stats -->
       <div class="row">
         <div class="col-xl-3 col-lg-6">
@@ -68,12 +68,12 @@
           </stats-card>
         </div>
       </div>
-    </base-header>
+    <!-- </base-header> -->
 
-    <div class="container-fluid mt--7">
+    <div class="container-fluid">
       <div class="row">
-        <div class="col">
-          <projects-table title="Light Table"></projects-table>
+        <div class="col pt-5">
+          <payroll-data-table></payroll-data-table>
         </div>
       </div>
       <!-- <div class="row mt-5">
@@ -86,11 +86,11 @@
   </div>
 </template>
 <script>
-import ProjectsTable from "./Tables/ProjectsTable";
+import PayrollDataTable from "./Tables/PayrollDataTable.vue";
 export default {
-  name: "tables",
+  name: "PayrollTable",
   components: {
-    ProjectsTable,
+    PayrollDataTable,
   },
 };
 </script>

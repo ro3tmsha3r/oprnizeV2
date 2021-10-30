@@ -17,6 +17,10 @@ import Modal from "../components/Modal.vue";
 // import StatsCard from "../components/StatsCard";
 import TabPane from "../components/Tabs/TabPane";
 import Tabs from "../components/Tabs/Tabs";
+import FormWizard from '../components/FormWizard.vue'
+import TabContent from '../components/TabContent.vue'
+import WizardButton from '../components/WizardButton.vue'
+import WizardStep from '../components/WizardStep.vue'
 
 import { ElTooltip, ElPopover } from "element-plus";
 
@@ -41,6 +45,10 @@ const GlobalComponents = {
     // app.component("stats-card", StatsCard);
     app.component("tab-pane", TabPane);
     app.component("tabs", Tabs);
+    app.component('form-wizard', FormWizard)
+    app.component('tab-content', TabContent)
+    app.component('wizard-button', WizardButton)
+    app.component('wizard-step', WizardStep)
     app.use(ElTooltip);
     app.use(ElPopover);
   },

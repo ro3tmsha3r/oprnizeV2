@@ -40,6 +40,7 @@
                   </div>
                   <div class="col-lg-4">
                     <base-input
+                      type="number"
                       alternative=""
                       label="ID Number / Iqama Number"
                       input-classes="form-control-alternative"
@@ -50,6 +51,7 @@
                 <div class="row">
                   <div class="col-lg-4">
                     <base-input
+                      type="number"
                       alternative=""
                       label="Mobile Number"
                       input-classes="form-control-alternative"
@@ -58,6 +60,7 @@
                   </div>
                   <div class="col-lg-4">
                     <base-input
+                      type="email"
                       alternative=""
                       label="Email"
                       input-classes="form-control-alternative"
@@ -78,12 +81,15 @@
                   <div class="pl-3">
                     <label>Nationality</label> <br />
                     <el-radio-group v-model="userInfo.contry" size="medium">
-                      <el-radio-button id="one" class="border-0 bg-gradient-lighter" label="Saudi Arabian" v-model="checked">
-                          <!-- <div style="display: flex;">
-                            <i  :class="[sortType == 'asc' ? 'text-gray-900' : '']" class="icon el-icon-arrow-up" ></i><span>Male</span>
-                          </div> -->
+                      <el-radio-button @click="showFirst" id="one" class="border-0 bg-gradient-lighter" label="Saudi Arabian" v-model="checked">
+                          <div style="display: flex;">
+                            <i :class="[isActive ? 'fa fa-check' : 'fa fa-plus']"></i><span>Saudi Arabian</span>
+                          </div> 
                       </el-radio-button>
-                      <el-radio-button id="two" class="ml-2 border-0 bg-gradient-lighter" label="Egyptian" v-model="checked">
+                      <el-radio-button @click="showSecond" id="two" class="ml-2 border-0 bg-gradient-lighter" label="Egyptian" v-model="checked">
+                        <div style="display: flex;">
+                            <i  :class="[isActiveSecond ? 'fa fa-check' : 'fa fa-plus']"></i><span>Egyptian</span>
+                          </div> 
                       </el-radio-button>
                     </el-radio-group>
                     <a href="#" class="mr-2">See more</a>
@@ -98,7 +104,7 @@
                           <i class="fa fa-mars" aria-hidden="true"></i><span>Male</span>
                           </div>
                         </el-radio-button>
-                      <el-radio-button label="Female"> 
+                      <el-radio-button label="Female" class="ml-2"> 
                           <div style="display: flex;">
                           <i class="fa fa-venus" aria-hidden="true"></i><span>Female</span>
                           </div>
@@ -110,23 +116,76 @@
                     <el-radio-group v-model="userInfo.marital" size="medium">
                       <el-radio-button label="Married">
                         </el-radio-button>
-                      <el-radio-button label="Single">
+                      <el-radio-button label="Single" class="ml-2">
                       </el-radio-button>
                     </el-radio-group>
                   </div>
                 </div>
               </div>
-              <hr class="my-4" />
+              <!-- <hr class="my-4" /> -->
               <div>
-                <a href="" class="pl-2 text-sm">More Informations <i class="ni ni-bold-down"></i></a>
+                <!-- <a href="" class="pl-2 text-sm">More Informations <i class="ni ni-bold-down"></i></a> -->
+                <el-collapse v-model="activeNames" @change="handleChange">
+                  <el-collapse-item title="More Informations" name="1">
+                    <div class="row">
+                  <div class="col-lg-4">
+                    <base-input
+                      type="number"
+                      alternative=""
+                      label="Card Number"
+                      input-classes="form-control-alternative"
+                      v-model="userInfo.cardNumber"
+                    />
+                  </div>
+                  <div class="col-lg-4">
+                    <base-input
+                      alternative=""
+                      label="Release Date"
+                      input-classes="form-control-alternative"
+                      v-model="userInfo.releaseDate"
+                      required
+                    />
+                  </div>
+                  <div class="col-lg-4">
+                    <base-input
+                      alternative=""
+                      label="Expiry Data"
+                      input-classes="form-control-alternative"
+                      v-model="userInfo.expiryData"
+                    />
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-4">
+                    <base-input
+                      type="number"
+                      alternative=""
+                      label="Passport Number"
+                      input-classes="form-control-alternative"
+                      v-model="userInfo.passportNumber"
+                    />
+                  </div>
+                  <div class="col-lg-4">
+                    <base-input
+                      alternative=""
+                      label="Expiry Date"
+                      input-classes="form-control-alternative"
+                      v-model="userInfo.expiryDate"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                  </el-collapse-item>
+                  </el-collapse>
               </div>
               <div class="text-right">
                 <router-link to="/AddNewEmployee/DepartmentInfo"
-                  ><base-button class="mr-2" type="default"
+                  ><base-button class="mr-2" style="background: #464648 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;"
                     >Next</base-button
                   ></router-link>
                 <!-- <router-link to="/AddNewEmployee/DepartmentInfo"> -->
-                  <base-button @click="personalInfo(userInfo)" type="primary">Save</base-button>
+                  <base-button @click="personalInfo(userInfo)" style="background: #007CC4 0% 0% no-repeat padding-box; border-radius: 3px 3px 10px 3px; opacity: 1;"> Save</base-button>
                   <!-- </router-link> -->
               </div>
             </form>
@@ -144,6 +203,7 @@ export default {
   data() {
     return {
       checked: false,
+      nationalityCheck: false,
       userInfo: {
         usernameEnglish: "",
         usernameArabic: "",
@@ -154,10 +214,32 @@ export default {
         marital: "",
         gender: "",
         contry: "",
+        cardNumber: null,
+        releaseDate: "",
+        expiryData: "",
+        passportNumber: null,
+        expiryDate: "",
       },
+      activeNames: 1,
+      isActive: false,
+      isActiveSecond: false,
     };
   },
   methods: {
+    showFirst(){
+      console.log('test')
+      this.isActiveSecond = false
+      this.isActive = true
+    },
+    showSecond(){
+      console.log('test')
+      this.isActive = false
+      this.isActiveSecond = true
+    },
+    onChange(val){
+      console.log(val.isTrusted)
+      this.nationalityCheck = val.isTrusted
+    },
     personalInfo(user) {
       console.log('test')
       this.$store.state.employees.push(
@@ -178,13 +260,29 @@ export default {
   }
 };
 </script>
-<style scoped>
+<style>
 .card-info {
   min-width: 375px;
 }
 .fa .fa-mars, .fa .fa-venus{
     padding: 0.40rem !important;
     margin-right: 0.25rem !important;
+}
+
+.card-body{
+  background-color: white!important;
+}
+
+.el-radio-button--medium .el-radio-button__inner{
+  background: #F3F3F3 0% 0% no-repeat padding-box!important;
+  border-radius: 3px 3px 10px 3px!important;
+  opacity: 1!important;
+}
+
+.el-radio-button__orig-radio:checked+.el-radio-button__inner{
+  /* color: #B1B1B1!important; */
+  /* margin: 0 10px; */
+  background-color: #007CC4!important;
 }
 
 </style>

@@ -262,12 +262,12 @@
               </div>
               <div class="text-right">
                 <router-link to="/AddNewEmployee/Review"
-                  ><base-button class="mr-2" type="danger"
+                  ><base-button class="mr-2" style="background: #F72525 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;"
                     >Reject</base-button
                   ></router-link
                 >
                 <router-link to="/AddNewEmployee/Review"
-                  ><base-button @click="approve(review)" type="primary"
+                  ><base-button @click="approve(review)" style="background: #007CC4 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;"
                     >Approve</base-button
                   ></router-link
                 >
@@ -307,6 +307,8 @@ export default {
         username: review[0].usernameEnglish,
         job_number: review[4].jobNumber,
         password: '12345678',
+        password_confirmation: '12345678',
+        company_id:'1',
         sex: review[0].gender,
         marital: review[0].marital,
         phone: review[0].mobileNumber,

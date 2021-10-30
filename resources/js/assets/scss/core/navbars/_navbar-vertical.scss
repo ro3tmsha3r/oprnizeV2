@@ -71,14 +71,17 @@
 
             &.active {
                 position: relative;
-
+                background: transparent linear-gradient(90deg, #eaf2fc 0%, #4A90E200 100%) 0% 0% no-repeat padding-box;  
+                opacity: 1;
+                color: #007CC4; 
                 &:before {
                     content: '';
                     position: absolute;
                     left: 0;
-                    top: $nav-link-padding-y;
-                    bottom: $nav-link-padding-y;
-                    border-left: 2px solid $primary;
+                    top: 0;
+                    bottom: 0;
+                    border-left: 2px solid #007cc4;
+                    border-radius: 45px;
                 }
             }
 
@@ -228,13 +231,17 @@
                         padding: $navbar-vertical-nav-link-padding-y $navbar-vertical-nav-link-padding-x;
 
                         &.active {
+                        background: transparent linear-gradient(90deg, #eaf2fc 0%, #4A90E200 100%) 0% 0% no-repeat padding-box;   
+                        opacity: 1;
+                        color: #007CC4;
                             &:before {
-                                top: $nav-link-padding-y;
-                                bottom: $nav-link-padding-y;
+                                top: 0;
+                                bottom: 0;
                                 left: 0;
                                 right: auto;
-                                border-left: 2px solid $primary;
+                                border-left: 4px solid #007cc4;
                                 border-bottom: 0;
+                                border-radius: 45px;
                             }
                         }
                     }

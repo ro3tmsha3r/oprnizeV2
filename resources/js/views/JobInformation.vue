@@ -86,18 +86,22 @@
                     <el-radio-button @change="check" label="Custome"></el-radio-button>
                     </el-radio-group>
                     <div v-if="customeIsChecked == true">
-                    <base-slider :value="[1]" :options="{tooltips: true, pips: true}" :range="{min: 1, max: 90}" v-model="sliders.slider1"></base-slider>
+                      <div class="slider-demo-block">
+                      <!-- <span class="demonstration">Default value</span> -->
+                      <el-slider v-model="sliders.slider1"></el-slider>
+                    </div>
+                    <!-- <base-slider :value="[1]" :options="{tooltips: true, pips: true}" :range="{min: 1, max: 90}" v-model="sliders.slider1"></base-slider> -->
                     </div>
                 </div>
               </div>
               <div class="text-right">
                 <router-link to="/AddNewEmployee/Compinsation">
-                  <base-button class="mr-2" type="default">
+                  <base-button class="mr-2" style="background: #464648 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;">
                     Next
                   </base-button>
                 </router-link>
                 <!-- <router-link to="/AddNewEmployee/Compinsation"> -->
-                  <base-button @click="jobInformation(jobInfo)" type="primary">
+                  <base-button @click="jobInformation(jobInfo)" style="background: #007CC4 0% 0% no-repeat padding-box; border-radius: 3px 3px 10px 3px; opacity: 1;">
                    Save
                   </base-button>
                 <!-- </router-link> -->

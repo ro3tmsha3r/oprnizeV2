@@ -89,12 +89,12 @@
               </div>
               <div class="text-right">
                 <router-link to="/AddNewEmployee/Review">
-                <base-button class="mr-2" type="default">
+                <base-button class="mr-2" style="background: #464648 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;">
                 Next
                 </base-button>
                 </router-link>
                 <!-- <router-link to="/AddNewEmployee/Review"> -->
-                <base-button @click="compinsationInfo(compinsation)" type="primary">Save</base-button>
+                <base-button @click="compinsationInfo(compinsation)" style="background: #007CC4 0% 0% no-repeat padding-box; border-radius: 3px 3px 10px 3px; opacity: 1;">Save</base-button>
                 <!-- </router-link> -->
               </div>
             </form>

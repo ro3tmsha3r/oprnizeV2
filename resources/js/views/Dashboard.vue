@@ -1,6 +1,6 @@
 <template>
   <div>
-    <base-header type="gradient-success" class="pb-6 pb-8 pt-5 pt-md-6"></base-header>
+    <!-- <base-header type="gradient-success" class="pb-6 pb-8 pt-5 pt-md-6"></base-header> -->
   </div>
 </template>
 <script>

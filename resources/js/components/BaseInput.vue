@@ -145,4 +145,11 @@ export default {
   },
 };
 </script>
-<style></style>
+<style scoped>
+.form-control {
+  /* background: #FFFFFF 0% 0% no-repeat padding-box!important; */
+  border: 0.30000001192092896px solid #007CC4!important; 
+  border-radius: 3px 3px 10px 3px!important; 
+  opacity: 1!important;
+}
+</style>
