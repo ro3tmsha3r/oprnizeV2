@@ -33,7 +33,7 @@
         </div>
 
         <!-- Login -->
-        <form v-else ref="login" :rules="loginRules" class="login-form validate-form">
+        <div v-else ref="login" :rules="loginRules" class="login-form validate-form">
           <div class="label-signup">
             You don't have an account? <strong><router-link to='/Signup'>Sign Up</router-link></strong>
           </div>
@@ -83,7 +83,7 @@
               Login
             </button>
           </div>
-        </form>
+        </div>
 
         <div class="login-more" style="">
           <section class="copy">
@@ -179,12 +179,13 @@ export default {
         password: this.login.password,
       })
       .then(() => {
+        console.log('dkls')
+        this.$router.push({name: 'dashboard'})
         this.$message({
             showClose: true,
             message: "Welcome " + this.login.email,
             type: "success",
           });
-        this.$router.push({path: '/Home'})
       })
       .catch((err) => {
           if (err.response.status == 422) {
