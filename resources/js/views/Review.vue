@@ -17,7 +17,7 @@
               </div>
             </template>
 
-            <form>
+            <form @submit.prevent="approve(review)">
               <div class="row">
                 <div>
                   <div class="media align-items-center">
@@ -130,11 +130,11 @@
                 <div class="col-lg-6">
                   <div style="display: flex">
                     <p>Department Name:</p>
-                    <span>{{ review[2].nameDepartment }}</span>
+                    <span>{{ review[1].nameDepartment }}</span>
                   </div>
                   <div style="display: flex">
                     <p>Work Shift:</p>
-                    <span>{{ review[2].workShift }}</span>
+                    <span>{{ review[1].workShift }}</span>
                   </div>
                 </div>
                 <div class="col-lg-1">
@@ -149,11 +149,11 @@
                 <div class="col-lg-5">
                   <div style="display: flex">
                     <p>Section:</p>
-                    <span>{{ review[2].section }}</span>
+                    <span>{{ review[1].section }}</span>
                   </div>
                   <div style="display: flex">
                     <p>Branch Name:</p>
-                    <span>{{ review[2].branchName }}</span>
+                    <span>{{ review[1].branchName }}</span>
                   </div>
                 </div>
               </div>
@@ -174,15 +174,15 @@
                 <div class="col-lg-6">
                   <div style="display: flex">
                     <p>Job Title:</p>
-                    <span>{{ review[4].jobTitle }}</span>
+                    <span>{{ review[2].jobTitle }}</span>
                   </div>
                   <div style="display: flex">
                     <p>Contract Type:</p>
-                    <span>{{ review[4].contractType }}</span>
+                    <span>{{ review[2].contractType }}</span>
                   </div>
                   <div style="display: flex">
                     <p>Contract Period:</p>
-                    <span>{{ review[4].joiningDate }}</span>
+                    <span>{{ review[2].joiningDate }}</span>
                   </div>
                 </div>
                 <div class="col-lg-1">
@@ -197,15 +197,15 @@
                 <div class="col-lg-5">
                   <div style="display: flex">
                     <p>Role:</p>
-                    <span>{{ review[4].role }}</span>
+                    <span>{{ review[2].role }}</span>
                   </div>
                   <div style="display: flex">
                     <p>Employment Type:</p>
-                    <span>{{ review[4].employmentType }}</span>
+                    <span>{{ review[2].employmentType }}</span>
                   </div>
                   <div style="display: flex">
                     <p>Probation Period:</p>
-                    <span>{{ review[4].probationPeriod }}</span>
+                    <span>{{ review[2].probationPeriod }}</span>
                   </div>
                 </div>
               </div>
@@ -225,15 +225,15 @@
                 <div class="col-lg-6">
                   <div style="display: flex">
                     <p>Basic:</p>
-                    <span>{{ review[6].basic }}</span>
+                    <span>{{ review[3].basic }}</span>
                   </div>
                   <div style="display: flex">
                     <p>Leave Balance:</p>
-                    <span>{{ review[6].leaveBalance }}</span>
+                    <span>{{ review[3].leaveBalance }}</span>
                   </div>
                   <div style="display: flex">
                     <p>IBAN:</p>
-                    <span>{{ review[6].IBAN }}</span>
+                    <span>{{ review[3].IBAN }}</span>
                   </div>
                 </div>
                 <div class="col-lg-1">
@@ -248,27 +248,27 @@
                 <div class="col-lg-5">
                   <div style="display: flex">
                     <p>Allowences:</p>
-                    <span>{{ review[6].Allowences }}</span>
+                    <span>{{ review[3].Allowences }}</span>
                   </div>
                   <div style="display: flex">
                     <p>Payment Method:</p>
-                    <span>{{ review[6].paymentMethod }}</span>
+                    <span>{{ review[3].paymentMethod }}</span>
                   </div>
                   <div style="display: flex">
                     <p>Bank Name:</p>
-                    <span>{{ review[6].bankName }}</span>
+                    <span>{{ review[3].bankName }}</span>
                   </div>
                 </div>
               </div>
               <div class="text-right">
                 <router-link to="/AddNewEmployee/Review"
-                  ><base-button class="mr-2" style="background: #F72525 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;"
-                    >Reject</base-button
+                  ><button class="mr-2" style="background: #F72525 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;height: 45px;width: 90px;color: white;"
+                    >Reject</button
                   ></router-link
                 >
                 <router-link to="/AddNewEmployee/Review"
-                  ><base-button @click="approve(review)" style="background: #007CC4 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;"
-                    >Approve</base-button
+                  ><button @click.prevent="approve(review)" style="background: #007CC4 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;height: 45px;width: 90px;color: white;"
+                    >Approve</button
                   ></router-link
                 >
               </div>
@@ -299,13 +299,13 @@ export default {
       this.customeIsChecked = true;
       console.log(this.customeIsChecked);
     },
-    async approve(review){
+     approve(review){
       console.log(review[0].usernameArabic)
-      await axios.post('employee', {
+       axios.post('employee', {
         name_en: review[0].usernameEnglish,
         name_ar: review[0].usernameArabic,
         username: review[0].usernameEnglish,
-        job_number: review[4].jobNumber,
+        job_number: review[2].jobNumber,
         password: '12345678',
         password_confirmation: '12345678',
         company_id:'1',
@@ -314,12 +314,12 @@ export default {
         phone: review[0].mobileNumber,
         identification_number: review[0].idNumber,
         email: review[0].email,
-        job_title: review[4].jobTitle,
-        type_of_contract: review[4].contractType,
-        testing_period: review[4].probationPeriod, 
-        contract_start_date: review[4].joiningDate,
-        basic_salary: review[6].basic,
-        vacations_balance: review[6].leaveBalance,
+        job_title: review[2].jobTitle,
+        type_of_contract: review[2].contractType,
+        testing_period: review[2].probationPeriod, 
+        contract_start_date: review[2].joiningDate,
+        basic_salary: review[3].basic,
+        vacations_balance: review[3].leaveBalance,
 
       })
       .then(() => {

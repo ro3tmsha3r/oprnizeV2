@@ -74,9 +74,9 @@
                   </div>
                 </div>
               <div class="text-right">
-                <router-link to="/AddNewEmployee/JobInformation"><base-button class="mr-2" style="background: #464648 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;">Next</base-button></router-link>
+                <router-link to="/AddNewEmployee/JobInformation"><button class="mr-2" style="background: #464648 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;height: 45px;width: 90px;color: white;">Next</button></router-link>
                 <!-- <router-link to="/AddNewEmployee/JobInformation"> -->
-                <base-button @click="DepartmentInfos(DepartmentInfo)" style="background: #007CC4 0% 0% no-repeat padding-box; border-radius: 3px 3px 10px 3px; opacity: 1;">Save</base-button>
+                <button @click="DepartmentInfos(DepartmentInfo)" style="background: #007CC4 0% 0% no-repeat padding-box; border-radius: 3px 3px 10px 3px; opacity: 1;height: 45px;width: 90px;color: white;">Save</button>
                 <!-- </router-link> -->
               </div>
             </form>
@@ -122,14 +122,8 @@ export default {
     },
     DepartmentInfos(data) {
       console.log('test')
-      this.$store.state.employees.push(
-        {
-        nameDepartment: data.nameDepartment,
-        section: data.section,
-        workShift: data.workShift,
-        branchName: data.branchName,
-        }
-      );
+      let clone = {...data};
+      this.$store.state.employees.push(clone);
       this.$router.push({path: '/AddNewEmployee/JobInformation'})
     }
   }

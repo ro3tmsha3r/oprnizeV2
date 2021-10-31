@@ -108,20 +108,20 @@ import {message} from 'element-plus'
 export default {
   name: "login",
   data() {
-    const validateEmail = (rule, value, callback) => {
-      if (!validEmail(value)) {
-        callback(new Error("Please enter the correct email"));
-      } else {
-        callback();
-      }
-    };
-    const validatePass = (rule, value, callback) => {
-      if (value.length < 4) {
-        callback(new Error("Password cannot be less than 4 digits"));
-      } else {
-        callback();
-      }
-    };
+    // const validateEmail = (rule, value, callback) => {
+    //   if (!validEmail(value)) {
+    //     callback(new Error("Please enter the correct email"));
+    //   } else {
+    //     callback();
+    //   }
+    // };
+    // const validatePass = (rule, value, callback) => {
+    //   if (value.length < 4) {
+    //     callback(new Error("Password cannot be less than 4 digits"));
+    //   } else {
+    //     callback();
+    //   }
+    // };
     return {
       login: {
         email: "",
@@ -131,10 +131,10 @@ export default {
       value2: 0,
       rememberMe: false,
       loginRules: {
-        email: [{ required: true, trigger: "blur", validator: validateEmail }],
-        password: [
-          { required: true, trigger: "blur", validator: validatePass },
-        ],
+        // email: [{ required: true, trigger: "blur", validator: validateEmail }],
+        // password: [
+        //   { required: true, trigger: "blur", validator: validatePass },
+        // ],
       },
       loading: false,
       pwdType: "password",

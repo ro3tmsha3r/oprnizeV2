@@ -21,6 +21,7 @@
               <div class="row">
                 <div class="col-lg-6">
                   <base-input
+                  type="number"
                     alternative=""
                     label="Basic"
                     input-classes="form-control-alternative"
@@ -62,6 +63,7 @@
                 <div class="row">
                   <div class="col-lg-6">
                     <base-input
+                    type="number"
                       alternative=""
                       label="IBAN"
                       input-classes="form-control-alternative"
@@ -89,12 +91,12 @@
               </div>
               <div class="text-right">
                 <router-link to="/AddNewEmployee/Review">
-                <base-button class="mr-2" style="background: #464648 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;">
+                <button class="mr-2" style="background: #464648 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;height: 45px;width: 90px;color: white;">
                 Next
-                </base-button>
+                </button>
                 </router-link>
                 <!-- <router-link to="/AddNewEmployee/Review"> -->
-                <base-button @click="compinsationInfo(compinsation)" style="background: #007CC4 0% 0% no-repeat padding-box; border-radius: 3px 3px 10px 3px; opacity: 1;">Save</base-button>
+                <button @click="compinsationInfo(compinsation)" style="background: #007CC4 0% 0% no-repeat padding-box; border-radius: 3px 3px 10px 3px; opacity: 1;height: 45px;width: 90px;color: white;">Save</button>
                 <!-- </router-link> -->
               </div>
             </form>
@@ -131,16 +133,8 @@ export default {
     },
     compinsationInfo(data) {
       console.log('test')
-      this.$store.state.employees.push(
-        {
-        basic: data.basic,
-        Allowences: data.Allowences,
-        leaveBalance: data.leaveBalance,
-        paymentMethod: data.paymentMethod,
-        bankName: data.bankName,
-        IBAN: data.IBAN,
-        }
-      );
+      let clone = {...data};
+      this.$store.state.employees.push(clone);
       this.$router.push({path: '/AddNewEmployee/Review'})
     }
   }
