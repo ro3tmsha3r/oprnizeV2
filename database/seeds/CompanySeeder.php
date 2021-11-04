@@ -1,6 +1,8 @@
 <?php
 
+use App\Company;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class CompanySeeder extends Seeder
 {
@@ -11,6 +13,10 @@ class CompanySeeder extends Seeder
      */
     public function run()
     {
-        //
+        $company = new Company();
+        $company->name = ['en' => 'Demo', 'ar' => 'تجربة'];
+        $company->user_id = 1;
+        $company->save();
+        
     }
 }

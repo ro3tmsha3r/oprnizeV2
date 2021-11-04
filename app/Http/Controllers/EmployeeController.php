@@ -52,6 +52,7 @@ class EmployeeController extends Controller
             'vacations_balance' => ['required'],
             'basic_salary' => ['required'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password_confirmation' => ['required'],
         ]);
 
         $user = new User();

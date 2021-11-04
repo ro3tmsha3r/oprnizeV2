@@ -1,5 +1,6 @@
 <?php
 
+use App\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -23,6 +24,16 @@ class CreateUsersTable extends Migration
             $table->softDeletes();
             $table->timestamps();
         });
+
+        $user = new User();
+        $user->name = "abdoforda";
+        $user->email = "abdelrahmaan3@gmail.com";
+        $user->email_verified_at = "2021-10-24 13:08:43";
+        $user->password = '$2y$10$sIwFJI8WTLcYXny.7HBIbOhXO8pYseo98VRq8I4/sY5BIrA9bJfyu';
+        $user->created_at = "2021-10-24 13:08:43";
+        $user->updated_at = "2021-10-24 13:08:43";
+        $user->save();
+
     }
 
     /**

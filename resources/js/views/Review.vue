@@ -281,7 +281,6 @@
 </template>
 <script>
 import axios from 'axios'
-
 export default {
   name: "Review",
   data() {
@@ -292,7 +291,6 @@ export default {
       },
     };
   },
-
   methods: {
     check(yes) {
       console.log(yes);
@@ -320,7 +318,6 @@ export default {
         contract_start_date: review[2].joiningDate,
         basic_salary: review[3].basic,
         vacations_balance: review[3].leaveBalance,
-
       })
       .then(() => {
         this.$message({
