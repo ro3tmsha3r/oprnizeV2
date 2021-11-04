@@ -240,6 +240,7 @@ export default {
   },
   mounted() {
     this.getVacations();
+    console.log(this.vacations)
   },
   methods: {
     getVacations: function () {
