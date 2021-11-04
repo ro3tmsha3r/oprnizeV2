@@ -265,12 +265,11 @@
                   ><base-button class="mr-2" style="background: #F72525 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;"
                     >Reject</base-button
                   ></router-link
-                >
-                <router-link to="/AddNewEmployee/Review"
-                  ><base-button @click="approve(review)" style="background: #007CC4 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;"
-                    >Approve</base-button
-                  ></router-link
-                >
+                >  
+                <base-button @click="approve(review)" style="background: #007CC4 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;"
+                    >Approve</base-button>
+
+                    <button @click="approve(review)">Svaeeeeee</button>
               </div>
             </form>
           </card>
