@@ -2,8 +2,6 @@
   <div class="wrapper" :class="{ 'nav-open': $sidebar.showSidebar }">
     <side-bar
       :background-color="sidebarBackground"
-      short-title="Argon"
-      title="Argon"
     >
       <template v-slot:links>
         <div style="display: flex;">

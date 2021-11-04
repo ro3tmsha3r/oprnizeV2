@@ -89,13 +89,13 @@ const routes = [
     name: "Login",
     // redirect: "/login",
     component: Login,
-    children: [
-      {
-        path: "/Login",
-        name: "login",
-        components: { default: Login },
-      },
-    ]
+    // children: [
+    //   {
+    //     path: "/",
+    //     name: "login",
+    //     components: { default: Login },
+    //   },
+    // ]
   },
   {
     path: "/Signup",

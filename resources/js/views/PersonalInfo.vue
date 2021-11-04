@@ -181,11 +181,11 @@
               </div>
               <div class="text-right">
                 <router-link to="/AddNewEmployee/DepartmentInfo"
-                  ><base-button class="mr-2" style="background: #464648 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;"
-                    >Next</base-button
+                  ><button class="mr-2" style="background: #464648 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;opacity: 1;height: 45px;width: 90px;color: white;"
+                    >Next</button
                   ></router-link>
                 <!-- <router-link to="/AddNewEmployee/DepartmentInfo"> -->
-                  <base-button @click="personalInfo(userInfo)" style="background: #007CC4 0% 0% no-repeat padding-box; border-radius: 3px 3px 10px 3px; opacity: 1;"> Save</base-button>
+                  <button @click.prevent="personalInfo(userInfo)" style="background: #007CC4 0% 0% no-repeat padding-box; border-radius: 3px 3px 10px 3px; opacity: 1;height: 45px;width: 90px;color: white;"> Save</button>
                   <!-- </router-link> -->
               </div>
             </form>
@@ -196,7 +196,7 @@
   </div>
 </template>
 <script>
-import { Field, Form } from 'vee-validate';
+// import { Field, Form } from 'vee-validate';
 
 export default {
   name: "PersonalInfo",
@@ -242,19 +242,8 @@ export default {
     },
     personalInfo(user) {
       console.log('test')
-      this.$store.state.employees.push(
-        {
-        usernameEnglish: user.usernameEnglish,
-        usernameArabic: user.usernameArabic,
-        email: user.email,
-        idNumber: user.idNumber,
-        mobileNumber: user.mobileNumber,
-        dateBirth: user.dateBirth,
-        marital: user.marital,
-        gender: user.gender,
-        contry: user.contry,
-        }
-      );
+      let clone = {...user};
+      this.$store.state.employees.push(clone);
       this.$router.push({path: '/AddNewEmployee/DepartmentInfo'})
     }
   }

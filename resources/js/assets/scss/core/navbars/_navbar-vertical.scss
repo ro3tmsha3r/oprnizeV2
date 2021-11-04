@@ -64,6 +64,15 @@
 
         // Navbar link
 
+        .nav-link:hover{
+            background: transparent linear-gradient(90deg, #eaf2fc 0%, #4A90E200 100%) 0% 0% no-repeat padding-box;  
+            opacity: 1;
+            color: #007CC4;
+    }
+
+    a.nav-link:hover{
+        border-left: 4px solid #007cc4;
+    }
         .nav-link {
             padding-left: $navbar-padding-x;
             padding-right: $navbar-padding-x;

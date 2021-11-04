@@ -33,7 +33,7 @@
         </div>
 
         <!-- Login -->
-        <form v-else ref="login" :rules="loginRules" class="login-form validate-form">
+        <div v-else ref="login" :rules="loginRules" class="login-form validate-form">
           <div class="label-signup">
             You don't have an account? <strong><router-link to='/Signup'>Sign Up</router-link></strong>
           </div>
@@ -83,7 +83,7 @@
               Login
             </button>
           </div>
-        </form>
+        </div>
 
         <div class="login-more" style="">
           <section class="copy">
@@ -108,20 +108,20 @@ import {message} from 'element-plus'
 export default {
   name: "login",
   data() {
-    const validateEmail = (rule, value, callback) => {
-      if (!validEmail(value)) {
-        callback(new Error("Please enter the correct email"));
-      } else {
-        callback();
-      }
-    };
-    const validatePass = (rule, value, callback) => {
-      if (value.length < 4) {
-        callback(new Error("Password cannot be less than 4 digits"));
-      } else {
-        callback();
-      }
-    };
+    // const validateEmail = (rule, value, callback) => {
+    //   if (!validEmail(value)) {
+    //     callback(new Error("Please enter the correct email"));
+    //   } else {
+    //     callback();
+    //   }
+    // };
+    // const validatePass = (rule, value, callback) => {
+    //   if (value.length < 4) {
+    //     callback(new Error("Password cannot be less than 4 digits"));
+    //   } else {
+    //     callback();
+    //   }
+    // };
     return {
       login: {
         email: "",
@@ -131,10 +131,10 @@ export default {
       value2: 0,
       rememberMe: false,
       loginRules: {
-        email: [{ required: true, trigger: "blur", validator: validateEmail }],
-        password: [
-          { required: true, trigger: "blur", validator: validatePass },
-        ],
+        // email: [{ required: true, trigger: "blur", validator: validateEmail }],
+        // password: [
+        //   { required: true, trigger: "blur", validator: validatePass },
+        // ],
       },
       loading: false,
       pwdType: "password",
@@ -179,12 +179,13 @@ export default {
         password: this.login.password,
       })
       .then(() => {
+        console.log('dkls')
+        this.$router.push({name: 'dashboard'})
         this.$message({
             showClose: true,
             message: "Welcome " + this.login.email,
             type: "success",
           });
-        this.$router.push({path: '/Home'})
       })
       .catch((err) => {
           if (err.response.status == 422) {
