@@ -95,7 +95,7 @@
                   <div class="pb-2 my-3">
                     <!-- <router-link to="/AddNewEmployee/Review"> -->
                     <button
-                      @click="showModal = true"
+                      @click="showModalMethod(vacations)"
                       class="mr-2"
                       style="
                         background: #464648 0% 0% no-repeat padding-box;
@@ -124,7 +124,16 @@
                     </button>
                     <!-- </router-link> -->
                   </div>
-                  <modal v-model:show="showModal">
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <modal v-model:show="showModal">
                     <template v-slot:header>
                       <h5 class="modal-title p-0" id="exampleModalLabel">
                         Request Details
@@ -134,73 +143,74 @@
                       <div class="mx-2 my-4">
                         <div>
                           <span class="style-B1">Number of days:</span
-                          ><span class="style-46">{{ vacations.days }}</span>
+                          ><span class="style-46">{{ vacationsModal.days }}</span>
                         </div>
                         <div>
                           <span class="style-B1">Starting Date:</span
                           ><span class="style-46">{{
-                            new Date(vacations.date_start).toDateString()
+                            new Date(vacationsModal.date_start).toDateString()
                           }}</span>
                         </div>
                         <div>
                           <span class="style-B1">Vacation End Date:</span
                           ><span class="style-46">{{
-                            new Date(vacations.date_end).toDateString()
+                            new Date(vacationsModal.date_end).toDateString()
                           }}</span>
                         </div>
                         <div>
                           <span class="style-B1">Return Date:</span
                           ><span class="style-46">{{
-                            new Date(vacations.date_end).toDateString()
+                            new Date(vacationsModal.date_end).toDateString()
                           }}</span>
                         </div>
                         <div>
                           <span class="style-B1">vacations Balance:</span
-                          ><span class="style-46">{{
-                            vacations.employee.vacations_balance
+                          >
+                          <span class="style-46">{{
+                            employeeModal.vacations_balance
                           }}</span>
                         </div>
                         <div>
                           <span class="style-B1">Remaining Balance:</span>
-                          <span class="style-46">{{vacations.employee.basic_salary}}</span>
+                          <span class="style-46">{{this.employeeModal.basic_salary}}</span>
                         </div>
                         <!-- Aditional Info -->
                         <div>
                           <span class="style-B1">Advance Salary:</span>
-                          <span class="style-46">{{vacations.advance_salary}}</span>
+                          <span class="style-46">{{vacationsModal.advance_salary}}</span>
                         </div>
                         <div>
                           <span class="style-B1">Paid In Advance:</span>
-                          <span class="style-46">{{vacations.paid_in_advance ? 'activated' : 'inactive'}}</span>
+                          <span class="style-46">{{vacationsModal.paid_in_advance ? 'activated' : 'inactive'}}</span>
                         </div>
                         <div>
                           <span class="style-B1">Ticket Request:</span>
-                          <span class="style-46">{{vacations.ticket_request ? 'activated' : 'inactive'}}</span>
+                          <span class="style-46">{{vacationsModal.ticket_request ? 'activated' : 'inactive'}}</span>
                         </div>
                         <div>
                           <span class="style-B1">Visa Request:</span>
-                          <span class="style-46">{{vacations.visa_request ? 'activated' : 'inactive'}}</span>
+                          <span class="style-46">{{vacationsModal.visa_request ? 'activated' : 'inactive'}}</span>
                         </div>
                         <div>
                           <span class="style-B1">Status:</span>
-                          <span class="style-46">{{vacations.status}}</span>
+                          <span class="style-46">{{vacationsModal.status}}</span>
                         </div>
                         <div>
                           <span class="style-B1">Discount Days:</span>
-                          <span class="style-46">{{vacations.discount_days}}</span>
+                          <span class="style-46">{{vacationsModal.discount_days}}</span>
                         </div>
                         <span>Employee's Info</span>
                         <div>
                           <span class="style-B1">Marital:</span>
-                          <span class="style-46">{{vacations.employee.marital}}</span>
+                          <span class="style-46">{{employeeModal.marital}}</span>
                         </div>
                         <div>
                           <span class="style-B1">Sex:</span>
-                          <span class="style-46">{{vacations.employee.sex}}</span>
+                          <span class="style-46">{{employeeModal.sex}}</span>
                         </div>
                         <div>
                           <span class="style-B1">Identification Number:</span>
-                          <span class="style-46">{{vacations.employee.identification_number}}</span>
+                          <span class="style-46">{{employeeModal.identification_number}}</span>
                         </div>
                       </div>
                     </div>
@@ -210,14 +220,6 @@
                       >
                     </template>
                   </modal>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script>
@@ -228,14 +230,22 @@ export default {
     return {
       showModal: false,
       vacations: [],
+      vacationsModal: [],
+      employeeModal: []
     };
   },
   mounted() {
     this.getVacations();
-    console.log(this.vacations)
-
+    // console.log(this.vacations)
+    console.log(this.vacations.employee)
   },
   methods: {
+    showModalMethod(vacations){
+      this.showModal = true
+      this.vacationsModal = vacations
+      this.employeeModal = vacations.employee
+      console.log(this.vacationsModal.employee)
+    },
     getVacations: function () {
       var app = this;
       axios
