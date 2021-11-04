@@ -171,15 +171,15 @@
                         </div>
                         <div>
                           <span class="style-B1">Paid In Advance:</span>
-                          <span class="style-46">{{vacations.paid_in_advance}}</span>
+                          <span class="style-46">{{vacations.paid_in_advance ? 'activated' : 'inactive'}}</span>
                         </div>
                         <div>
                           <span class="style-B1">Ticket Request:</span>
-                          <span class="style-46">{{vacations.ticket_request}}</span>
+                          <span class="style-46">{{vacations.ticket_request ? 'activated' : 'inactive'}}</span>
                         </div>
                         <div>
                           <span class="style-B1">Visa Request:</span>
-                          <span class="style-46">{{vacations.visa_request}}</span>
+                          <span class="style-46">{{vacations.visa_request ? 'activated' : 'inactive'}}</span>
                         </div>
                         <div>
                           <span class="style-B1">Status:</span>
@@ -190,14 +190,6 @@
                           <span class="style-46">{{vacations.discount_days}}</span>
                         </div>
                         <span>Employee's Info</span>
-                        <div>
-                          <span class="style-B1">Marital:</span>
-                          <span class="style-46">{{vacations.employee.marital}}</span>
-                        </div>
-                        <div>
-                          <span class="style-B1">Marital:</span>
-                          <span class="style-46">{{vacations.employee.marital}}</span>
-                        </div>
                         <div>
                           <span class="style-B1">Marital:</span>
                           <span class="style-46">{{vacations.employee.marital}}</span>
@@ -235,12 +227,13 @@ export default {
   data() {
     return {
       showModal: false,
-      vacations: []
+      vacations: [],
     };
   },
   mounted() {
     this.getVacations();
     console.log(this.vacations)
+
   },
   methods: {
     getVacations: function () {
