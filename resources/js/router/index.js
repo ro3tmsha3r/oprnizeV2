@@ -15,6 +15,7 @@ import personalInfo from '../views/personalInfo.vue'
 import DepartmentInfo from '../views/DepartmentInfo.vue'
 import JobInformation from '../views/JobInformation.vue'
 import Compinsation from '../views/Compinsation.vue'
+import Vacations from '../views/Vacations.vue'
 import Review from '../views/Review.vue'
 
 
@@ -81,6 +82,11 @@ const routes = [
         path: "/Transactions",
         name: "Transactions",
         components: { default: Transactions },
+      },
+      {
+        path: "/Vacations",
+        name: "Vacations",
+        components: { default: Vacations },
       },
     ],
   },
