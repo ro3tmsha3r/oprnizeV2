@@ -14,7 +14,8 @@ class AdministrationController extends Controller
      */
     public function index()
     {
-        //
+        $c = Administration::where('company_id', auth()->user()->company->id)->get();
+        return $c;
     }
 
     /**
@@ -24,8 +25,7 @@ class AdministrationController extends Controller
      */
     public function create()
     {
-        $c = Administration::where('company_id', auth()->user()->company->id)->get();
-        return $c;
+        
     }
 
     /**
