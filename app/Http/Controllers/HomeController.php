@@ -25,7 +25,7 @@ class HomeController extends Controller
     public function index()
     {
         $user = User::find(1);
-        return $user;
+        return $user->company;
          auth()->user()->restore();
          return "asdasd";
         return view('home');

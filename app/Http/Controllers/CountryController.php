@@ -44,7 +44,7 @@ class CountryController extends Controller
         ]);
         $c = new Country();
         $c->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
-        $c->company_id = auth()->user()->company;
+        $c->company_id = auth()->user()->company->id;
         $c->save();
         return $c;
     }

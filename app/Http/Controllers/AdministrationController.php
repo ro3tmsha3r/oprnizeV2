@@ -42,7 +42,7 @@ class AdministrationController extends Controller
         ]);
 
         $c = new Administration();
-        $c->company_id = auth()->user()->company;
+        $c->company_id = auth()->user()->company->id;
         $c->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
         $c->save();
         return $c;

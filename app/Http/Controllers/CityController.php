@@ -42,7 +42,7 @@ class CityController extends Controller
             'country_id' => ['required'],
         ]);
         $c = new City();
-        $c->company_id = auth()->user()->company;
+        $c->company_id = auth()->user()->company->id;
         $c->administration_id = $request->country_id;
         $c->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
         $c->save();

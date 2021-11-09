@@ -43,7 +43,7 @@ class TitlejobController extends Controller
             'section_id' => ['required'],
         ]);
         $c = new Titlejob();
-        $c->company_id = auth()->user()->company;
+        $c->company_id = auth()->user()->company->id;
         $c->section_id = $request->section_id;
         $c->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
         $c->save();

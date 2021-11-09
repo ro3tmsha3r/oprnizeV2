@@ -52,7 +52,7 @@ class AllowanceController extends Controller
         }
 
         $c = new Allowance();
-        $c->company_id = auth()->user()->company;
+        $c->company_id = auth()->user()->company->id;
         $c->type = $request->type;
         $c->price = $request->price;
         $c->percentage = $request->percentage;

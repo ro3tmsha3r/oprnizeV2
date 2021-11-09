@@ -42,7 +42,7 @@ class SectionController extends Controller
             'administration_id' => ['required'],
         ]);
         $c = new Section();
-        $c->company_id = auth()->user()->company;
+        $c->company_id = auth()->user()->company->id;
         $c->administration_id = $request->administration_id;
         $c->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
         $c->save();
