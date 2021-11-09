@@ -1,8 +1,5 @@
 <template>
   <div class="p-2">
-    <!-- <div class="container-fluid mt--7">
-      <div class="w-96 mt-8 ml-9">
-        <div class="col-xl-8 order-xl-1"> -->
           <card class="card-info" shadow type="secondary">
             <template v-slot:header>
               <div class="bg-white border-0">
@@ -10,16 +7,13 @@
                   <div class="col-8">
                     <h3 class="mb-0">Department Info</h3>
                   </div>
-                  <!-- <div class="col-4 text-right">
-                    <a href="#!" class="btn btn-sm btn-primary">Settings</a>
-                  </div> -->
                 </div>
               </div>
             </template>
 
             <form>
               <h6 class="heading-small text-muted mb-4">Department information</h6>
-              <!-- <div class="pl-lg-12"> -->
+              <div class="pl-lg-12">
                 <div class="row">
                   <div class="col-lg-12">
                     <label>Name Of Department</label> <br>
@@ -61,7 +55,7 @@
                     </el-radio-group>
                   </div>
                 </div> 
-              <!-- </div> -->
+              </div>
               <div class="row">
                   <div class="col-lg-12">
                     <base-input

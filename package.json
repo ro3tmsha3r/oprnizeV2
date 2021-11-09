@@ -40,8 +40,10 @@
         "bootstrap-icons": "^1.6.1",
         "element-plus": "1.0.1-beta.24",
         "nouislider": "^15.5.0",
+        "vee-validate": "^4.5.5",
         "vue": "^3.2.2",
         "vue-router": "4.0.1",
-        "vuex": "^4.0.2"
+        "vuex": "^4.0.2",
+        "yup": "^0.32.11"
     }
 }

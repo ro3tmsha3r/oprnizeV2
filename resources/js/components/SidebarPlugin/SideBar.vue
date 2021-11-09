@@ -110,12 +110,19 @@
             </a>
           </li>
           <li class="nav-item">
-            <a
+            <!-- <a
               class="nav-link"
               href="#"
             >
               <i class="fa fa-cogs"></i> Settings
-            </a>
+            </a> -->
+            <sidebar-item
+              :link="{
+                name: 'Settings',
+                icon: 'fa fa-cogs',
+                path: '/Settings',
+              }"
+            />
           </li>
         </ul>
       </div>

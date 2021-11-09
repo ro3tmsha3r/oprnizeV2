@@ -18,6 +18,14 @@ import Compinsation from '../views/Compinsation.vue'
 import Vacations from '../views/Vacations.vue'
 import Review from '../views/Review.vue'
 
+// Settings
+import Settings from '../views/Settings/Settings.vue'
+import Nationalities from "../views/Settings/Nationalities.vue";
+import Cities from "../views/Settings/Cities.vue";
+import Allowances from "../views/Settings/Allowances.vue";
+import Departments from "../views/Settings/Departments.vue";
+import Sections from "../views/Settings/Sections.vue";
+import JobTitles from "../views/Settings/JobTitles.vue";
 
 
 
@@ -87,6 +95,43 @@ const routes = [
         path: "/Vacations",
         name: "Vacations",
         components: { default: Vacations },
+      },
+      {
+        path: "/Settings",
+        name: "Settings",
+        components: { default: Settings },
+        children: [
+          {
+            path: "Nationalities",
+            name: "Nationalities",
+            components: { default: Nationalities },
+          },
+          {
+            path: "Cities",
+            name: "Cities",
+            components: { default: Cities },
+          },
+          {
+            path: "Allowances",
+            name: "Allowances",
+            components: { default: Allowances },
+          },
+          {
+            path: "Departments",
+            name: "Departments",
+            components: { default: Departments },
+          },
+          {
+            path: "Sections",
+            name: "Sections",
+            components: { default: Sections },
+          },
+          {
+            path: "JobTitles",
+            name: "JobTitles",
+            components: { default: JobTitles },
+          },
+        ],
       },
     ],
   },
