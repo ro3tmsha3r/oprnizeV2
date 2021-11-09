@@ -14,7 +14,7 @@ class AllowanceController extends Controller
      */
     public function index()
     {
-        $c = Allowance::where('company_id', auth()->user()->company)->get();
+        $c = Allowance::where('company_id', auth()->user()->company->id)->get();
         return $c;
     }
 

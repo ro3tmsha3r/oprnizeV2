@@ -15,7 +15,7 @@ class TitlejobController extends Controller
      */
     public function index()
     {
-        $c = Titlejob::where('company_id', auth()->user()->company)->get();
+        $c = Titlejob::where('company_id', auth()->user()->company->id)->get();
         return $c;
     }
 

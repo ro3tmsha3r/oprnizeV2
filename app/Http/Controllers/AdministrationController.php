@@ -24,7 +24,7 @@ class AdministrationController extends Controller
      */
     public function create()
     {
-        $c = Administration::where('company_id', auth()->user()->company)->get();
+        $c = Administration::where('company_id', auth()->user()->company->id)->get();
         return $c;
     }
 

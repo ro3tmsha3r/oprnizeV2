@@ -14,7 +14,7 @@ class CityController extends Controller
      */
     public function index()
     {
-        $c = City::where('company_id', auth()->user()->company)->get();
+        $c = City::where('company_id', auth()->user()->company->id)->get();
         return $c;
     }
 

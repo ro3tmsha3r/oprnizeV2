@@ -15,7 +15,7 @@ class CountryController extends Controller
     public function index()
     {
 
-        $c = Country::where('company_id', auth()->user()->company)->get();
+        $c = Country::where('company_id', auth()->user()->company->id)->get();
         return $c;
         //
     }
