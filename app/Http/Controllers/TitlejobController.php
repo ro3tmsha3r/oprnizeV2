@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Administration;
+use App\Titlejob;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class AdministrationController extends Controller
+class TitlejobController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +15,8 @@ class AdministrationController extends Controller
      */
     public function index()
     {
-        //
+        $c = Titlejob::where('company_id', auth()->user()->company)->get();
+        return $c;
     }
 
     /**
@@ -24,8 +26,7 @@ class AdministrationController extends Controller
      */
     public function create()
     {
-        $c = Administration::where('company_id', auth()->user()->company)->get();
-        return $c;
+        //
     }
 
     /**
@@ -39,10 +40,11 @@ class AdministrationController extends Controller
         $request->validate([
             'name_ar' => ['required'],
             'name_en' => ['required'],
+            'section_id' => ['required'],
         ]);
-
-        $c = new Administration();
+        $c = new Titlejob();
         $c->company_id = auth()->user()->company;
+        $c->section_id = $request->section_id;
         $c->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
         $c->save();
         return $c;
@@ -51,10 +53,10 @@ class AdministrationController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Administration  $administration
+     * @param  \App\Titlejob  $titlejob
      * @return \Illuminate\Http\Response
      */
-    public function show(Administration $administration)
+    public function show(Titlejob $titlejob)
     {
         //
     }
@@ -62,10 +64,10 @@ class AdministrationController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Administration  $administration
+     * @param  \App\Titlejob  $titlejob
      * @return \Illuminate\Http\Response
      */
-    public function edit(Administration $administration)
+    public function edit(Titlejob $titlejob)
     {
         //
     }
@@ -74,30 +76,33 @@ class AdministrationController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Administration  $administration
+     * @param  \App\Titlejob  $titlejob
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Administration $administration)
+    public function update(Request $request, Titlejob $titlejob)
     {
         $request->validate([
             'name_ar' => ['required'],
             'name_en' => ['required'],
+            'section_id' => ['required'],
         ]);
 
-        $administration->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
-        $administration->save();
-        return $administration;
+
+        $titlejob->section_id = $request->section_id;
+        $titlejob->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
+        $titlejob->save();
+        return $titlejob;
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Administration  $administration
+     * @param  \App\Titlejob  $titlejob
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Administration $administration)
+    public function destroy(Titlejob $titlejob)
     {
-        $administration->delete();
+        $titlejob->delete();
         return "success";
     }
 }

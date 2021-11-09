@@ -14,7 +14,8 @@ class AllowanceController extends Controller
      */
     public function index()
     {
-        //
+        $c = Allowance::where('company_id', auth()->user()->company)->get();
+        return $c;
     }
 
     /**
@@ -35,7 +36,29 @@ class AllowanceController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name_ar' => ['required'],
+            'name_en' => ['required'],
+            'type' => ['required'],
+        ]);
+
+        if($request->price == '' && $request->percentage == ''){
+            return response()->json([
+                'errors' => [
+                    'price' => ['required'],
+                    'percentage' => ['required']
+                ]
+            ], 401);
+        }
+
+        $c = new Allowance();
+        $c->company_id = auth()->user()->company;
+        $c->type = $request->type;
+        $c->price = $request->price;
+        $c->percentage = $request->percentage;
+        $c->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
+        $c->save();
+        return $c;
     }
 
     /**
@@ -69,7 +92,27 @@ class AllowanceController extends Controller
      */
     public function update(Request $request, Allowance $allowance)
     {
-        //
+        $request->validate([
+            'name_ar' => ['required'],
+            'name_en' => ['required'],
+            'type' => ['required'],
+        ]);
+
+        if($request->price == '' && $request->percentage == ''){
+            return response()->json([
+                'errors' => [
+                    'price' => ['required'],
+                    'percentage' => ['required']
+                ]
+            ], 401);
+        }
+
+        $allowance->type = $request->type;
+        $allowance->price = $request->price;
+        $allowance->percentage = $request->percentage;
+        $allowance->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
+        $allowance->save();
+        return $allowance;
     }
 
     /**
@@ -80,6 +123,7 @@ class AllowanceController extends Controller
      */
     public function destroy(Allowance $allowance)
     {
-        //
+        $allowance->delete();
+        return "success";
     }
 }

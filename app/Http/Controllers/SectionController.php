@@ -14,7 +14,8 @@ class SectionController extends Controller
      */
     public function index()
     {
-        //
+        $c = Section::where('company_id', auth()->user()->company)->get();
+        return $c;
     }
 
     /**
@@ -35,7 +36,17 @@ class SectionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name_ar' => ['required'],
+            'name_en' => ['required'],
+            'administration_id' => ['required'],
+        ]);
+        $c = new Section();
+        $c->company_id = auth()->user()->company;
+        $c->administration_id = $request->administration_id;
+        $c->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
+        $c->save();
+        return $c;
     }
 
     /**
@@ -69,7 +80,16 @@ class SectionController extends Controller
      */
     public function update(Request $request, Section $section)
     {
-        //
+        $request->validate([
+            'name_ar' => ['required'],
+            'name_en' => ['required'],
+            'administration_id' => ['required'],
+        ]);
+
+        $section->administration_id = $request->administration_id;
+        $section->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
+        $section->save();
+        return $section;
     }
 
     /**
@@ -80,6 +100,7 @@ class SectionController extends Controller
      */
     public function destroy(Section $section)
     {
-        //
+        $section->delete();
+        return "success";
     }
 }

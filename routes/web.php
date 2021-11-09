@@ -26,6 +26,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('employee', 'EmployeeController');
     Route::resource('typevacations', 'TypevacationsController');
     Route::resource('vacations', 'VacationsController');
+    Route::resource('country', 'CountryController');
+    Route::resource('city', 'CityController');
+    Route::resource('administration', 'AdministrationController');
+    Route::resource('section', 'SectionController');
+    Route::resource('titlejob', 'TitlejobController');
+    Route::resource('allowance', 'AllowanceController');
 });
 
 

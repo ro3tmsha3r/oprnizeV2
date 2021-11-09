@@ -14,6 +14,9 @@ class CountryController extends Controller
      */
     public function index()
     {
+
+        $c = Country::where('company_id', auth()->user()->company)->get();
+        return $c;
         //
     }
 
@@ -35,7 +38,15 @@ class CountryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name_ar' => ['required'],
+            'name_en' => ['required']
+        ]);
+        $c = new Country();
+        $c->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
+        $c->company_id = auth()->user()->company;
+        $c->save();
+        return $c;
     }
 
     /**
@@ -69,7 +80,15 @@ class CountryController extends Controller
      */
     public function update(Request $request, Country $country)
     {
-        //
+        $request->validate([
+            'id' => ['required'],
+            'name_ar' => ['required'],
+            'name_en' => ['required']
+        ]);
+
+        $country->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
+        $country->save();
+        return $country;
     }
 
     /**
@@ -80,6 +99,7 @@ class CountryController extends Controller
      */
     public function destroy(Country $country)
     {
-        //
+        $country->delete();
+        return "success";
     }
 }

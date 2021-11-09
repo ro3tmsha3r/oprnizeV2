@@ -14,7 +14,8 @@ class CityController extends Controller
      */
     public function index()
     {
-        //
+        $c = City::where('company_id', auth()->user()->company)->get();
+        return $c;
     }
 
     /**
@@ -35,7 +36,17 @@ class CityController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name_ar' => ['required'],
+            'name_en' => ['required'],
+            'country_id' => ['required'],
+        ]);
+        $c = new City();
+        $c->company_id = auth()->user()->company;
+        $c->administration_id = $request->country_id;
+        $c->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
+        $c->save();
+        return $c;
     }
 
     /**
@@ -69,7 +80,16 @@ class CityController extends Controller
      */
     public function update(Request $request, City $city)
     {
-        //
+        $request->validate([
+            'name_ar' => ['required'],
+            'name_en' => ['required'],
+            'country_id' => ['required'],
+        ]);
+
+        $city->country_id = $request->country_id;
+        $city->name = ['en'=>$request->name_en,'ar'=>$request->name_ar];
+        $city->save();
+        return $city;
     }
 
     /**
@@ -80,6 +100,7 @@ class CityController extends Controller
      */
     public function destroy(City $city)
     {
-        //
+        $city->delete();
+        return "success";
     }
 }

@@ -16,6 +16,7 @@ class CreateAdministrationsTable extends Migration
         Schema::create('administrations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
+            $table->text('name');
             $table->timestamps();
         });
     }
