@@ -25,10 +25,10 @@
                   <li class="nav-item">
                     <router-link
                       class="nav-link"
-                      to="/AddNewEmployee/DepartmentInfo"
+                      to="/AddNewEmployee/JobInformation"
                     >
-                      <i class="ni ni-building"></i>
-                      <span> Department Info </span>
+                      <i class="ni ni-briefcase-24"></i>
+                      <span> Job Information </span>
                       <!-- <el-step></el-step> -->
                     </router-link>
                   </li>
@@ -37,10 +37,10 @@
                   <li class="nav-item">
                     <router-link
                       class="nav-link"
-                      to="/AddNewEmployee/JobInformation"
+                      to="/AddNewEmployee/DepartmentInfo"
                     >
-                      <i class="ni ni-briefcase-24"></i>
-                      <span> Job Information </span>
+                      <i class="ni ni-building"></i>
+                      <span> Department Info </span>
                       <!-- <el-step></el-step> -->
                     </router-link>
                   </li>

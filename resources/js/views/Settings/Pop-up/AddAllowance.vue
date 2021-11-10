@@ -29,85 +29,38 @@
         </Field>
       </div>
     </div>
-    <Field name="allowanceType" v-slot="{ value, field, errorMessage }">
-      <el-form-item :error="errorMessage">
-        <h5>Allowance Type</h5>
-        <el-radio-group v-for="(item, index) in types" :key="index" v-model="allowance.allowanceType" @change="setIcon">
-          <el-radio-button
-            class="border-0 mx-1"
-            v-bind="field"
-            :model-value="value"
-           :label="item"
-          >
-              <div v-if="valueClicked == item" style="display: flex">
-                <i :class="[isActive ? 'fa fa-check' : 'fa fa-plus']"/>
-                <span class="pl-1">{{ item }}</span>
-              </div>
-              <div v-else style="display: flex">
-                <i class="fa fa-plus"/>
-                <span class="pl-1">{{ item }}</span>
-              </div>
-           </el-radio-button>
-        </el-radio-group>
-      </el-form-item>
-    </Field>
 
     <div class="row">
       <div class="col-lg-6">
         <Field name="valueInRyal" v-slot="{ value, field, errorMessage }">
           <el-form-item :error="errorMessage">
             <h5>Value In Ryal</h5>
-            <!-- <base-input
-              v-if="allowance.valueInPercentage != null"
-              disabled
-              type="number"
-              v-bind="field"
-              :model-value="value"
-              v-model="allowance.valueInRyal"
-            /> -->
             <base-input
               type="number"
               v-bind="field"
               :model-value="value"
               v-model="allowance.valueInRyal"
+              v-bind:disabled="allowance.valueInPercentage.length > 0"
             />
           </el-form-item>
         </Field>
       </div>
+
       <div class="col-lg-6">
         <Field name="valueInPercentage" v-slot="{ value, field, errorMessage }">
           <el-form-item :error="errorMessage">
             <h5>Value In Percentage</h5>
-            <!-- <base-input
-              v-if=" allowance.valueInRyal != null"
-              disabled
-              type="number"
-              v-bind="field"
-              :model-value="value"
-              v-model="allowance.valueInPercentage"
-            /> -->
             <base-input
               type="number"
               v-bind="field"
               :model-value="value"
               v-model="allowance.valueInPercentage"
+              v-bind:disabled="allowance.valueInRyal.length > 0"
             />
           </el-form-item>
         </Field>
       </div>
     </div>
-
-    <Field name="isCalculated" v-slot="{ value, field, errorMessage }">
-      <el-form-item :error="errorMessage" >
-        <div style="display: flex!important;">
-          <h5 class="pr-3">It is calculated in the previous salary</h5>
-          <el-switch v-bind="field"
-            :model-value="value" 
-            v-model="allowance.isCalculated" 
-          />
-        </div>
-      </el-form-item>
-    </Field>
 
     <div style="text-align: end;">
       <el-button type="primary" native-type="submit" style="background: #007CC4 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;">Add</el-button>
@@ -130,14 +83,11 @@ export default {
       allowance: {
         arabicName: '',
         englishName: '',
-        allowanceType: '',
-        valueInRyal: null,
-        valueInPercentage: null,
-        isCalculated: false,
+        valueInRyal: '',
+        valueInPercentage: '',
       },
       isActive: false,
       valueClicked: "",
-      types: ['Addition','Deduction']
     };
   },
   components: {
@@ -156,9 +106,8 @@ export default {
     const schema = yup.object({
       arabicName: yup.string().required().label("Arabic Name"),
       englishName: yup.string().required().label("english Name"),
-      allowanceType: yup.string().required().label("Allowance Type"),
-      valueInRyal: yup.number().required().label('Value In Ryal'),
-      valueInPercentage: yup.number().min(1).max(100).required().label('Value In Percentage'),
+      valueInRyal: yup.number().label('Value In Ryal'),
+      valueInPercentage: yup.number().min(1).max(100).label('Value In Percentage'),
     });
 
     function onSubmit(values, actions) {
@@ -167,7 +116,6 @@ export default {
        axios.post('/allowance', {
          name_ar: values.arabicName,
          name_en: values.englishName,
-         type: values.allowanceType,
          price: values.valueInRyal,
          percentage: values.valueInPercentage,
        })
