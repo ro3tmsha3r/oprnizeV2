@@ -13,14 +13,14 @@
   >
     <el-table-column type="selection" width="55" />
     <el-table-column property="name.ar" label="Arabic Name" width="140" />
-    <el-table-column property="job_title" label="English Name" width="140" />
-    <el-table-column property="allowance_type" label="Allowance Type" width="140" />
-    <el-table-column property="value_in_ryal" label="Value In Ryal" width="130" />
-    <el-table-column property="value_in_percentage" label="Value In Percentage" width="160" />
+    <el-table-column property="name.en" label="English Name" width="140" />
+    <el-table-column property="type" label="Allowance Type" width="140" />
+    <el-table-column property="price" label="Value In Ryal" width="130" />
+    <el-table-column property="percentage" label="Value In Percentage" width="160" />
     <el-table-column property="is_calculated" label="Calculated in the previous salary" width="200" />
     <el-table-column label="Operations">
       <template #default="scope">
-        <el-button size="mini" @click="showEditAllowance"
+        <el-button size="mini" @click="showEditAllowance(scope.$index, scope.row)"
           >Edit</el-button
         >
         <el-button
@@ -56,7 +56,7 @@
       class="rounded-3xl md:shadow-md"
       width="50%"
     >
-      <edit-allowance @close-edit-allowance ="closeEditAllowance "/>
+      <edit-allowance :itemToEdit="itemToEdit" @close-edit-allowance ="closeEditAllowance "/>
     </el-dialog>
 </template>
 <script>
@@ -82,6 +82,7 @@ export default {
       allowances: [],
       addAllowanceAttr: false,
       editAllowanceAttr: false,
+      itemToEdit: null,
     };
   },
   mounted() {
@@ -94,8 +95,9 @@ export default {
     closeAddAllowance() {
       this.addAllowanceAttr = false;
     },
-    showEditAllowance() {
+    showEditAllowance(index, row) {
       this.editAllowanceAttr = true;
+      this.itemToEdit = row.id
     },
     closeEditAllowance() {
       this.editAllowanceAttr = false;
@@ -103,7 +105,7 @@ export default {
     getAllowances: function () {
       var app = this;
       axios
-        .get("/employee")
+        .get("/allowance")
         .then(function (response) {
           app.allowances = response.data;
           console.log(app.allowances);
@@ -127,10 +129,22 @@ export default {
         }
       )
         .then(() => {
-          ElMessage({
-            type: 'success',
-            message: 'Delete completed',
+          axios.delete(`allowance/${row.id}`, {
+            id: row.id
           })
+          .then(() => { 
+            ElMessage({
+              type: 'success',
+              message: 'Delete completed',
+            })
+          })
+          .catch(() => {
+          ElMessage({
+            type: 'error',
+            message: 'Try Again!',
+          })
+        })
+
         })
         .catch(() => {
           ElMessage({
@@ -138,6 +152,7 @@ export default {
             message: 'Delete canceled',
           })
         })
+      
     },
   },
 };

@@ -35,6 +35,7 @@
 import axios from 'axios'
 import { Field, Form } from "vee-validate";
 import * as yup from "yup";
+import { ElMessage } from 'element-plus'
 
 export default {
   name: "EditDepartment",
@@ -47,11 +48,14 @@ export default {
       }
     };
   },
+  props:{
+    itemToEdit: Number,
+  },
   components: {
     Form,
     Field,
   },
- setup() {
+ setup(props, context) {
     const schema = yup.object({
       arabicName: yup.string().required().label("Arabic Name"),
       englishName: yup.string().required().label("english Name"),
@@ -60,23 +64,23 @@ export default {
     function onSubmit(values, actions) {
       console.log(JSON.stringify(values, null, 2));
       actions.resetForm();
-      //  axios.post('', {})
-      // .then(() => {
-      //   this.$message({
-      //       showClose: true,
-      //       message: department.arabicName + "has been added successfully ",
-      //       type: "success",
-      //     });
-      //   this.$router.push({path: '/'})
-      // })
-      // .catch((err) => {
-      //   console.log(err)
-      //       this.$message({
-      //         showClose: true,
-      //         message: "Try Again!",
-      //         type: "error",
-      //       });
-      // });
+       axios.put(`administration/${props.itemToEdit}`,  {
+         name_ar: values.arabicName,
+         name_en: values.englishName,
+         id: props.itemToEdit,
+       })
+      .then(() => {
+        context.emit('close-edit-department')
+        ElMessage({
+          showClose: true,
+          message: values.arabicName + "has been updated successfully ",
+          type: 'success',
+        })
+      })
+      .catch((err) => {
+        console.log(err)
+        ElMessage.error('Try again!')
+      });
     }
     return {
       onSubmit,

@@ -13,11 +13,10 @@
   >
     <el-table-column type="selection" width="55" />
     <el-table-column property="name.ar" label="Arabic Name" width="300" />
-    <el-table-column property="job_title" label="English Name" width="300" />
+    <el-table-column property="name.en" label="English Name" width="300" />
     <el-table-column label="Operations">
       <template #default="scope">
-        <el-button @click="showEditNationality" size="mini">
-           <!-- @click="handleEdit(scope.$index, scope.row)" -->
+        <el-button @click="showEditNationality(scope.$index, scope.row)" size="mini">
           Edit
         </el-button>
         <el-button
@@ -53,7 +52,7 @@
       class="rounded-3xl md:shadow-md"
       width="30%"
     >
-      <edit-nationality @close-add-nationality="closeAddNationality"/>
+      <edit-nationality :itemToEdit="itemToEdit" @close-add-nationality="closeAddNationality"/>
   </el-dialog>
 </template>
 <script>
@@ -79,6 +78,7 @@ export default {
       nationalities: [],
       addNationalityAttr: false,
       editNationalityAttr: false,
+      itemToEdit: null,
     };
   },
   mounted() {
@@ -91,8 +91,9 @@ export default {
     closeAddNationality() {
       this.addNationalityAttr = false;
     },
-    showEditNationality() {
+    showEditNationality(index, row) {
       this.editNationalityAttr = true;
+      this.itemToEdit = row.id
     },
     closeEditNationality() {
       this.editNationalityAttr = false;
@@ -100,10 +101,11 @@ export default {
     getNationalities: function () {
       var app = this;
       axios
-        .get("/employee")
+        .get("/country")
         .then(function (response) {
           app.nationalities = response.data;
           console.log(app.nationalities);
+          console.log(response.data);
         })
         .catch(function (error) {
           console.log(error);
@@ -124,10 +126,22 @@ export default {
         }
       )
         .then(() => {
-          ElMessage({
-            type: 'success',
-            message: 'Delete completed',
+          axios.delete(`country/${row.id}`, {
+            id: row.id
           })
+          .then(() => { 
+            ElMessage({
+              type: 'success',
+              message: 'Delete completed',
+            })
+          })
+          .catch(() => {
+          ElMessage({
+            type: 'error',
+            message: 'Try Again!',
+          })
+        })
+
         })
         .catch(() => {
           ElMessage({
@@ -135,6 +149,7 @@ export default {
             message: 'Delete canceled',
           })
         })
+      
     },
   },
 };

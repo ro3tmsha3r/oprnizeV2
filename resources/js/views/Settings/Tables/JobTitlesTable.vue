@@ -7,17 +7,17 @@
       </div>
   <el-table
     ref="multipleTable"
-    :data="nationalities"
+    :data="jobTitles"
     style="width: 100%"
     @selection-change="handleSelectionChange"
   >
     <el-table-column type="selection" width="55" />
     <el-table-column property="name.ar" label="Arabic Name" width="260" />
-    <el-table-column property="job_title" label="English Name" width="260" />
-    <el-table-column property="job_title" label="Section Name" width="260" />
+    <el-table-column property="name.en" label="English Name" width="260" />
+    <el-table-column property="section_id" label="Section Name" width="260" />
     <el-table-column label="Operations">
       <template #default="scope">
-        <el-button size="mini" @click="showEditJobTitle"
+        <el-button size="mini" @click="showEditJobTitle(scope.$index, scope.row)"
           >Edit</el-button
         >
         <el-button
@@ -34,7 +34,7 @@
 
     <div class="block">
     <!-- <span class="demonstration">When you have more than 7 pages</span> -->
-    <el-pagination layout="prev, pager, next" :total="nationalities.length" :page-size="10" class="text-right pt-4"></el-pagination>
+    <el-pagination layout="prev, pager, next" :total="jobTitles.length" :page-size="10" class="text-right pt-4"></el-pagination>
   </div>
 
   <!-- Call add Job Title popup -->
@@ -53,7 +53,7 @@
       class="rounded-3xl md:shadow-md"
       width="30%"
     >
-      <edit-job-title @close-edit-job-title="closeEditJobTitle"/>
+      <edit-job-title :itemToEdit="itemToEdit" @close-edit-job-title="closeEditJobTitle"/>
     </el-dialog>
 </template>
 <script>
@@ -76,13 +76,14 @@ export default {
   },
   data() {
     return {
-      nationalities: [],
+      jobTitles: [],
       addJobTitleAttr: false,
       editJobTitleAttr: false,
+      itemToEdit: null,
     };
   },
   mounted() {
-    this.getNationalities();
+    this.getJobTitles();
   },
   methods: {
     showAddJobTitle() {
@@ -91,19 +92,20 @@ export default {
     closeAddJobTitle() {
       this.addJobTitleAttr = false;
     },
-    showEditJobTitle() {
+    showEditJobTitle(index, row) {
       this.editJobTitleAttr = true;
+      this.itemToEdit = row.id
     },
     closeEditJobTitle() {
       this.editJobTitleAttr = false;
     },
-    getNationalities: function () {
+    getJobTitles: function () {
       var app = this;
       axios
-        .get("/employee")
+        .get("/titlejob")
         .then(function (response) {
-          app.nationalities = response.data;
-          console.log(app.nationalities);
+          app.jobTitles = response.data;
+          console.log(app.jobTitles);
         })
         .catch(function (error) {
           console.log(error);
@@ -124,10 +126,22 @@ export default {
         }
       )
         .then(() => {
-          ElMessage({
-            type: 'success',
-            message: 'Delete completed',
+          axios.delete(`titlejob/${row.id}`, {
+            id: row.id
           })
+          .then(() => { 
+            ElMessage({
+              type: 'success',
+              message: 'Delete completed',
+            })
+          })
+          .catch(() => {
+          ElMessage({
+            type: 'error',
+            message: 'Try Again!',
+          })
+        })
+
         })
         .catch(() => {
           ElMessage({
@@ -135,6 +149,7 @@ export default {
             message: 'Delete canceled',
           })
         })
+      
     },
   },
 };

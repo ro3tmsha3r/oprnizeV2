@@ -13,11 +13,11 @@
   >
     <el-table-column type="selection" width="55" />
     <el-table-column property="name.ar" label="Arabic Name" width="260" />
-    <el-table-column property="job_title" label="English Name" width="260" />
-    <el-table-column property="nationality" label="Nationality" width="260" />
+    <el-table-column property="name.en" label="English Name" width="260" />
+    <el-table-column property="country_id" label="Nationality" width="260" />
     <el-table-column label="Operations">
       <template #default="scope">
-        <el-button size="mini" @click="showEditCity"
+        <el-button size="mini" @click="showEditCity(scope.$index, scope.row)"
           >Edit</el-button
         >
         <el-button
@@ -53,7 +53,7 @@
       class="rounded-3xl md:shadow-md"
       width="30%"
     >
-      <edit-city @close-edit-city="closeEditCity"/>
+      <edit-city :itemToEdit="itemToEdit" @close-edit-city="closeEditCity"/>
     </el-dialog>
 </template>
 <script>
@@ -79,6 +79,7 @@ export default {
       cities: [],
       addCityAttr: false,
       editCityAttr: false,
+      itemToEdit: null,
     };
   },
   mounted() {
@@ -91,8 +92,9 @@ export default {
     closeAddCity() {
       this.addCityAttr = false;
     },
-    showEditCity() {
+    showEditCity(index, row) {
       this.editCityAttr = true;
+      this.itemToEdit = row.id
     },
     closeEditCity() {
       this.editCityAttr = false;
@@ -100,7 +102,7 @@ export default {
     getCities: function () {
       var app = this;
       axios
-        .get("/employee")
+        .get("/city")
         .then(function (response) {
           app.cities = response.data;
           console.log(app.cities);
@@ -124,10 +126,22 @@ export default {
         }
       )
         .then(() => {
-          ElMessage({
-            type: 'success',
-            message: 'Delete completed',
+          axios.delete(`city/${row.id}`, {
+            id: row.id
           })
+          .then(() => { 
+            ElMessage({
+              type: 'success',
+              message: 'Delete completed',
+            })
+          })
+          .catch(() => {
+          ElMessage({
+            type: 'error',
+            message: 'Try Again!',
+          })
+        })
+
         })
         .catch(() => {
           ElMessage({
@@ -135,6 +149,7 @@ export default {
             message: 'Delete canceled',
           })
         })
+      
     },
   },
 };

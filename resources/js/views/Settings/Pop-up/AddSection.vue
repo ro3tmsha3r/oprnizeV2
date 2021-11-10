@@ -34,13 +34,12 @@
           :model-value="value"
           v-model="section.departmentName"
         >
-          <option selected>Select Your Department Name</option>
           <option 
             v-for="(item, index) in departments"
             :key="index"
-            :value="item"
+            :value="item.id"
           >
-            {{ item }}
+            {{ item.name.ar }}
           </option>
         </select>
       </el-form-item>
@@ -56,6 +55,7 @@
 import axios from 'axios'
 import { Field, Form } from "vee-validate";
 import * as yup from "yup";
+import { ElMessage } from 'element-plus'
 
 export default {
   name: "AddSection",
@@ -67,7 +67,7 @@ export default {
         englishName: '',
         departmentName: '',
       },
-      departments: [ 'HR Department', 'Financial department'],
+      departments: [],
 
     };
   },
@@ -75,7 +75,24 @@ export default {
     Form,
     Field,
   },
- setup() {
+  mounted(){
+    this.getDepartments()
+  },
+  methods: {
+    getDepartments: function () {
+      var app = this;
+      axios
+        .get("/administration")
+        .then(function (response) {
+          app.departments = response.data;
+          console.log(app.departments);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+  },
+ setup(props, context) {
     const schema = yup.object({
       arabicName: yup.string().required().label("Arabic Name"),
       englishName: yup.string().required().label("english Name"),
@@ -85,23 +102,23 @@ export default {
     function onSubmit(values, actions) {
       console.log(JSON.stringify(values, null, 2));
       actions.resetForm();
-      //  axios.post('', {})
-      // .then(() => {
-      //   this.$message({
-      //       showClose: true,
-      //       message: section.arabicName + "has been added successfully ",
-      //       type: "success",
-      //     });
-      //   this.$router.push({path: '/'})
-      // })
-      // .catch((err) => {
-      //   console.log(err)
-      //       this.$message({
-      //         showClose: true,
-      //         message: "Try Again!",
-      //         type: "error",
-      //       });
-      // });
+       axios.post('/section', {
+         name_ar: values.arabicName,
+         name_en: values.englishName,
+         administration_id: values.departmentName,
+       })
+      .then(() => {
+        context.emit('close-add-section')
+        ElMessage({
+          showClose: true,
+          message: values.arabicName + "has been added successfully ",
+          type: 'success',
+        })
+      })
+      .catch((err) => {
+        console.log(err)
+        ElMessage.error('Try again!')
+      });
     }
     return {
       onSubmit,

@@ -28,20 +28,20 @@
     <Field name="nationality" v-slot="{ value, field, errorMessage }">
       <el-form-item :error="errorMessage">
         <h5>Select Nationality</h5>
-        <el-radio-group v-for="(item, index) in nationalities" :key="index" v-model="city.nationality" @change="setIcon">
+        <el-radio-group v-for="(item, index) in nationalities" :key="index" v-model="city.nationality" @change="setIcon(item)">
           <el-radio-button
             class="border-0 mx-1"
             v-bind="field"
             :model-value="value"
-           :label="item"
+           :label="item.id"
           >
               <div v-if="valueClicked == item" style="display: flex">
                 <i :class="[isActive ? 'fa fa-check' : 'fa fa-plus']"/>
-                <span class="pl-1">{{ item }}</span>
+                <span class="pl-1">{{ item.name.ar }}</span>
               </div>
               <div v-else style="display: flex">
                 <i class="fa fa-plus"/>
-                <span class="pl-1">{{ item }}</span>
+                <span class="pl-1">{{ item.name.ar }}</span>
               </div>
            </el-radio-button>
         </el-radio-group>
@@ -68,34 +68,51 @@
 import axios from "axios";
 import { Field, Form } from "vee-validate";
 import * as yup from "yup";
+import { ElMessage } from 'element-plus'
 
 export default {
   name: "AddCity",
   data() {
     return {
-      nationalities: ["Saudi Arabian","Egyptian","Los Angeles","Chicago"],
       city: {
         arabicName: "",
         englishName: "",
         nationality: "",
+        country_id: null,
       },
       isActive: false,
       valueClicked: "",
+      nationalities: [],
     };
   },
   components: {
     Form,
     Field,
   },
+  mounted() {
+    this.getNationalities();
+  },
   methods:{
     setIcon(e){
         this.isActive = true
-        console.log(this.city.nationality)
         this.valueClicked = e
         console.log('chang',e)
-    }
+    },
+    getNationalities() {
+      var app = this;
+      axios
+        .get("/country")
+        .then(function (response) {
+          app.nationalities = response.data;
+          console.log(app.nationalities);
+          console.log(response.data);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
   },
-  setup() {
+  setup(props, context) {
     const schema = yup.object({
       arabicName: yup.string().required().label("Arabic Name"),
       englishName: yup.string().required().label("English Name"),
@@ -104,27 +121,26 @@ export default {
         .required()
         .label("Nationality"),
     });
-
     function onSubmit(values, actions) {
       console.log(JSON.stringify(values, null, 2));
       actions.resetForm();
-      //  axios.post('', {})
-      // .then(() => {
-      //   this.$message({
-      //       showClose: true,
-      //       message: city.arabicName + "has been added successfully ",
-      //       type: "success",
-      //     });
-      //   this.$router.push({path: '/'})
-      // })
-      // .catch((err) => {
-      //   console.log(err)
-      //       this.$message({
-      //         showClose: true,
-      //         message: "Try Again!",
-      //         type: "error",
-      //       });
-      // });
+       axios.post('/city', {
+        name_ar: values.arabicName,
+        name_en: values.englishName,
+        country_id: values.nationality,
+       })
+      .then(() => {
+        context.emit('close-add-city')
+        ElMessage({
+          showClose: true,
+          message: values.arabicName + "has been added successfully ",
+          type: 'success',
+      })
+      })
+      .catch((err) => {
+        console.log(err)
+        ElMessage.error('Try again!')
+      });
     }
     return {
       onSubmit,

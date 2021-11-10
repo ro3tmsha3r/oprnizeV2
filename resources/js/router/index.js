@@ -4,19 +4,19 @@ import DashboardLayout from "../layout/DashboardLayout";
 // import AuthLayout from "@/layout/AuthLayout";
 
 import Dashboard from "../views/Dashboard.vue";
-// import Icons from "../views/Icons.vue";
-// import Maps from "../views/Maps.vue";
-// import Profile from "../views/UserProfile.vue";
-import Employees from "../views/Employees.vue";
+
+// Employees
+import Employees from "../views/Employees/Employees.vue";
+import AddNewEmployee from '../views/Employees/AddNewEmployee.vue'
+import personalInfo from '../views/Employees/personalInfo.vue'
+import DepartmentInfo from '../views/Employees/DepartmentInfo.vue'
+import JobInformation from '../views/Employees/JobInformation.vue'
+import Compinsation from '../views/Employees/Compinsation.vue'
+import Review from '../views/Employees/Review.vue'
+
 import PayrollTable from "../views/PayrollTable.vue"
 import Transactions from "../views/Transactions.vue"
-import AddNewEmployee from '../views/AddNewEmployee.vue'
-import personalInfo from '../views/personalInfo.vue'
-import DepartmentInfo from '../views/DepartmentInfo.vue'
-import JobInformation from '../views/JobInformation.vue'
-import Compinsation from '../views/Compinsation.vue'
 import Vacations from '../views/Vacations.vue'
-import Review from '../views/Review.vue'
 
 // Settings
 import Settings from '../views/Settings/Settings.vue'
@@ -138,15 +138,7 @@ const routes = [
   {
     path: "/",
     name: "Login",
-    // redirect: "/login",
     component: Login,
-    // children: [
-    //   {
-    //     path: "/",
-    //     name: "login",
-    //     components: { default: Login },
-    //   },
-    // ]
   },
   {
     path: "/Signup",

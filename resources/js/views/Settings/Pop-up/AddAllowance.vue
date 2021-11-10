@@ -57,6 +57,14 @@
         <Field name="valueInRyal" v-slot="{ value, field, errorMessage }">
           <el-form-item :error="errorMessage">
             <h5>Value In Ryal</h5>
+            <!-- <base-input
+              v-if="allowance.valueInPercentage != null"
+              disabled
+              type="number"
+              v-bind="field"
+              :model-value="value"
+              v-model="allowance.valueInRyal"
+            /> -->
             <base-input
               type="number"
               v-bind="field"
@@ -70,6 +78,14 @@
         <Field name="valueInPercentage" v-slot="{ value, field, errorMessage }">
           <el-form-item :error="errorMessage">
             <h5>Value In Percentage</h5>
+            <!-- <base-input
+              v-if=" allowance.valueInRyal != null"
+              disabled
+              type="number"
+              v-bind="field"
+              :model-value="value"
+              v-model="allowance.valueInPercentage"
+            /> -->
             <base-input
               type="number"
               v-bind="field"
@@ -104,6 +120,8 @@ import axios from 'axios'
 import { Field, Form } from "vee-validate";
 import * as yup from "yup";
 import BaseInput from '../../../components/BaseInput.vue';
+import { ElMessage } from 'element-plus'
+
 
 export default {
   name: "AddAllowance",
@@ -134,7 +152,7 @@ export default {
         console.log('chang',e)
     }
   },
- setup() {
+ setup(props, context) {
     const schema = yup.object({
       arabicName: yup.string().required().label("Arabic Name"),
       englishName: yup.string().required().label("english Name"),
@@ -146,23 +164,25 @@ export default {
     function onSubmit(values, actions) {
       console.log(JSON.stringify(values, null, 2));
       actions.resetForm();
-      //  axios.post('', {})
-      // .then(() => {
-      //   this.$message({
-      //       showClose: true,
-      //       message: allowance.arabicName + "has been added successfully ",
-      //       type: "success",
-      //     });
-      //   this.$router.push({path: '/'})
-      // })
-      // .catch((err) => {
-      //   console.log(err)
-      //       this.$message({
-      //         showClose: true,
-      //         message: "Try Again!",
-      //         type: "error",
-      //       });
-      // });
+       axios.post('/allowance', {
+         name_ar: values.arabicName,
+         name_en: values.englishName,
+         type: values.allowanceType,
+         price: values.valueInRyal,
+         percentage: values.valueInPercentage,
+       })
+      .then(() => {
+        context.emit('close-add-allowance')
+        ElMessage({
+          showClose: true,
+          message: values.arabicName + "has been added successfully ",
+          type: 'success',
+        })
+      })
+      .catch((err) => {
+        console.log(err)
+        ElMessage.error('Try again!')
+      });
     }
     return {
       onSubmit,

@@ -13,11 +13,11 @@
   >
     <el-table-column type="selection" width="55" />
     <el-table-column property="name.ar" label="Arabic Name" width="260" />
-    <el-table-column property="job_title" label="English Name" width="260" />
-    <el-table-column property="job_title" label="Department Name" width="260" />
+    <el-table-column property="name.en" label="English Name" width="260" />
+    <el-table-column property="administration_id" label="Department Name" width="260" />
     <el-table-column label="Operations">
       <template #default="scope">
-        <el-button size="mini" @click="showEditSection"
+        <el-button size="mini" @click="showEditSection(scope.$index, scope.row)"
           >Edit</el-button
         >
         <el-button
@@ -52,7 +52,7 @@
       class="rounded-3xl md:shadow-md"
       width="30%"
     >
-      <edit-section @close-esit-section="closeEditSection"/>
+      <edit-section :itemToEdit="itemToEdit" @close-edit-section="closeEditSection"/>
     </el-dialog>
 </template>
 <script>
@@ -78,6 +78,7 @@ export default {
       Sections: [],
       addSectionAttr: false,
       editSectionAttr: false,
+      itemToEdit: null,
     };
   },
   mounted() {
@@ -90,8 +91,9 @@ export default {
     closeAddSection() {
       this.addSectionAttr = false;
     },
-    showEditSection() {
+    showEditSection(index, row) {
       this.editSectionAttr = true;
+      this.itemToEdit = row.id
     },
     closeEditSection() {
       this.editSectionAttr = false;
@@ -99,7 +101,7 @@ export default {
     getSections: function () {
       var app = this;
       axios
-        .get("/employee")
+        .get("/section")
         .then(function (response) {
           app.Sections = response.data;
           console.log(app.Sections);
@@ -123,10 +125,22 @@ export default {
         }
       )
         .then(() => {
-          ElMessage({
-            type: 'success',
-            message: 'Delete completed',
+          axios.delete(`section/${row.id}`, {
+            id: row.id
           })
+          .then(() => { 
+            ElMessage({
+              type: 'success',
+              message: 'Delete completed',
+            })
+          })
+          .catch(() => {
+          ElMessage({
+            type: 'error',
+            message: 'Try Again!',
+          })
+        })
+
         })
         .catch(() => {
           ElMessage({
@@ -134,6 +148,7 @@ export default {
             message: 'Delete canceled',
           })
         })
+      
     },
   },
 };
