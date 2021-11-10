@@ -12,12 +12,10 @@
     @selection-change="handleSelectionChange"
   >
     <el-table-column type="selection" width="55" />
-    <el-table-column property="name.ar" label="Arabic Name" width="140" />
-    <el-table-column property="name.en" label="English Name" width="140" />
-    <el-table-column property="type" label="Allowance Type" width="140" />
-    <el-table-column property="price" label="Value In Ryal" width="130" />
-    <el-table-column property="percentage" label="Value In Percentage" width="160" />
-    <el-table-column property="is_calculated" label="Calculated in the previous salary" width="200" />
+    <el-table-column property="name.ar" label="Arabic Name" width="200" />
+    <el-table-column property="name.en" label="English Name" width="200" />
+    <el-table-column property="price" label="Value In Ryal" width="200" />
+    <el-table-column property="percentage" label="Value In Percentage" width="200" />
     <el-table-column label="Operations">
       <template #default="scope">
         <el-button size="mini" @click="showEditAllowance(scope.$index, scope.row)"
