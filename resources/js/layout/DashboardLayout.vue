@@ -89,14 +89,7 @@
           :link="{
             name: 'Payroll Table',
             icon: 'ni ni-money-coins',
-            path: '/PayrollTable',
-          }"
-        />
-        <sidebar-item
-          :link="{
-            name: 'Transactions',
-            icon: 'ni ni-money-coins',
-            path: '/Transactions',
+            path: '/MonthPayroll',
           }"
         />
         <sidebar-item

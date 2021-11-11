@@ -14,9 +14,12 @@ import JobInformation from '../views/Employees/JobInformation.vue'
 import Compinsation from '../views/Employees/Compinsation.vue'
 import Review from '../views/Employees/Review.vue'
 
-import PayrollTable from "../views/PayrollTable.vue"
-import Transactions from "../views/Transactions.vue"
-import Vacations from '../views/Vacations.vue'
+//Payroll
+import Months from "../views/Payroll/Months.vue"
+import PayrollTable from "../views/Payroll/PayrollTable.vue"
+
+//Vacations
+import Vacations from '../views/Vacations/Vacations.vue'
 
 // Settings
 import Settings from '../views/Settings/Settings.vue'
@@ -26,8 +29,6 @@ import Allowances from "../views/Settings/Allowances.vue";
 import Departments from "../views/Settings/Departments.vue";
 import Sections from "../views/Settings/Sections.vue";
 import JobTitles from "../views/Settings/JobTitles.vue";
-
-
 
 
 import Login from "../views/auth/Login.vue";
@@ -82,14 +83,14 @@ const routes = [
         components: { default: Employees },
       },
       {
-        path: "/PayrollTable",
+        path: "/:month/PayrollTable",
         name: "PayrollTable",
         components: { default: PayrollTable },
       },
       {
-        path: "/Transactions",
-        name: "Transactions",
-        components: { default: Transactions },
+        path: "/MonthPayroll",
+        name: "Months",
+        components: { default: Months },
       },
       {
         path: "/Vacations",

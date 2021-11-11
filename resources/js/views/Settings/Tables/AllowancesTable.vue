@@ -59,7 +59,7 @@
 </template>
 <script>
 import axios from "axios";
-import AddAllowance from '../Pop-up/AddAllowance.vue'
+import AddAllowance from '../Add/AddAllowance.vue'
 import EditAllowance from '../Edit/EditAllowance.vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 

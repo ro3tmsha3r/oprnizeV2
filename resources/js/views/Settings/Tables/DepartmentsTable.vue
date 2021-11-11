@@ -57,7 +57,7 @@
 </template>
 <script>
 import axios from "axios";
-import AddDepartment from '../Pop-up/AddDepartment.vue'
+import AddDepartment from '../Add/AddDepartment.vue'
 import EditDepartment from '../Edit/EditDepartment.vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 

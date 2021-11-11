@@ -58,7 +58,7 @@
 </template>
 <script>
 import axios from "axios";
-import AddCity from '../Pop-up/AddCity.vue'
+import AddCity from '../Add/AddCity.vue'
 import EditCity from '../Edit/EditCity.vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 

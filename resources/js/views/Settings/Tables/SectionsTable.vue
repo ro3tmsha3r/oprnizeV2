@@ -57,7 +57,7 @@
 </template>
 <script>
 import axios from "axios";
-import AddSection from '../Pop-up/AddSection.vue'
+import AddSection from '../Add/AddSection.vue'
 import EditSection from '../Edit/EditSection.vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 

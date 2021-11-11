@@ -58,7 +58,7 @@
 </template>
 <script>
 import axios from "axios";
-import AddJobTitle from '../Pop-up/AddJobTitle.vue'
+import AddJobTitle from '../Add/AddJobTitle.vue'
 import EditJobTitle from '../Edit/EditJobTitle.vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 

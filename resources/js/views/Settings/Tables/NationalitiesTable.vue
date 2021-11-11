@@ -57,7 +57,7 @@
 </template>
 <script>
 import axios from "axios";
-import AddNationality from '../Pop-up/AddNationality.vue'
+import AddNationality from '../Add/AddNationality.vue'
 import EditNationality from '../Edit/EditNationality.vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 
