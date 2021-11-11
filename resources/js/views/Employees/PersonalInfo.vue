@@ -239,7 +239,6 @@ export default {
     setIcon(e){
         this.isActive = true
         this.valueClicked = e
-        console.log('chang',e)
     },
     getNationalities() {
       var app = this;

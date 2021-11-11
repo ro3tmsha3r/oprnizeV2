@@ -43,6 +43,7 @@
         "vee-validate": "^4.5.5",
         "vue": "^3.2.2",
         "vue-router": "4.0.1",
+        "vue-slider-component": "^4.0.0-beta.4",
         "vuex": "^4.0.2",
         "yup": "^0.32.11"
     }

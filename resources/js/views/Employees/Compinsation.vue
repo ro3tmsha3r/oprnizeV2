@@ -36,10 +36,13 @@
           <div class="col-lg-12">
             <label>Leave Balance</label> <br />
             <el-radio-group v-model="compinsation.leaveBalance" size="medium">
-              <el-radio-button label="21"></el-radio-button>
-              <el-radio-button label="30"></el-radio-button>
-              <el-radio-button label="Custome"></el-radio-button>
+              <el-radio-button @change="check21" label="21"></el-radio-button>
+              <el-radio-button @change="check21" label="30"></el-radio-button>
+              <el-radio-button @change="check" label="Custome"></el-radio-button>
             </el-radio-group>
+            <div :class="[customeIsChecked ? 'visible' : 'hidden']">
+              <vue-slider v-bind="options" v-model="sliders.slider1" />
+            </div> 
           </div>
         </div>
         <div class="row">
@@ -120,6 +123,10 @@
   </div>
 </template>
 <script>
+
+import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/antd.css'
+
 export default {
   name: "Compinsation",
   data() {
@@ -134,15 +141,27 @@ export default {
       },
       customeIsChecked: false,
       sliders: {
-        slider1: 0,
+        slider1: 1
+      },
+      options: {
+        dotSize: 14,
+        width: '60%',
+        height: 4,
+        min: 1,
+        max: 89,
       },
     };
   },
+  components: {
+    VueSlider
+  },
   methods: {
-    check(yes) {
-      console.log(yes);
+    check(yes){
       this.customeIsChecked = true;
-      console.log(this.customeIsChecked);
+      // this.custome = yes
+    },
+    check21(yes){
+      this.customeIsChecked = false;
     },
     compinsationInfo(data) {
       console.log("test");
@@ -156,5 +175,12 @@ export default {
 <style scoped>
 .card-info {
   min-width: 375px;
+}
+
+.visible {
+  visibility: visible!important;
+}
+.hidden{
+  visibility: hidden!important;
 }
 </style>

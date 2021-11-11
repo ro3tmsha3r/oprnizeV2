@@ -51,7 +51,6 @@
                   <label>Joining Date</label> <br />
                   <base-input
                     type="date"
-                    al
                     ternative=""
                     input-classes="form-control-alternative"
                     v-model="jobInfo.joiningDate"
@@ -63,8 +62,8 @@
                     <el-radio-group v-model="jobInfo.role" size="medium">
                       <el-radio-button label="HR"></el-radio-button>
                       <el-radio-button label="Supervisor"></el-radio-button>
-                      <el-radio-button label="HR"></el-radio-button>
-                      <el-radio-button label="Supervisor"></el-radio-button>
+                      <el-radio-button label="HRs"></el-radio-button>
+                      <el-radio-button label="Supervisors"></el-radio-button>
                     </el-radio-group>
                   </div>
                 </div>
@@ -97,15 +96,12 @@
                     <el-radio-button @change="check90" label="90 days"></el-radio-button>
                     <el-radio-button @change="check" label="Custome"></el-radio-button>
                     </el-radio-group>
-                    <div v-if="customeIsChecked == true">
+                    <!-- <div v-if="customeIsChecked == true">
                       
-                    </div>
+                    </div> -->
                     <div :class="[customeIsChecked ? 'visible' : 'hidden']">
-                      <el-slider :min="1" :max="89" v-model="sliders.slider1" style="width: 60%;!important"></el-slider>
-                      {{sliders.slider1}}
-                    </div>
-
-                    
+                      <vue-slider v-bind="options" v-model="sliders.slider1" />
+                    </div>               
                 </div>
               </div>
               <div class="text-right">
@@ -124,6 +120,8 @@
 </template>
 <script>
 import axios from "axios";
+import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/antd.css'
 
 export default {
   name: "JobInformation",
@@ -142,8 +140,18 @@ export default {
       sliders: {
         slider1: 1
       },
+      options: {
+        dotSize: 14,
+        width: '60%',
+        height: 4,
+        min: 1,
+        max: 89,
+      },
       jobTitles: [],
     };
+  },
+  components: {
+    VueSlider
   },
   mounted() {
     this.getJobTitles();
@@ -192,5 +200,9 @@ export default {
 }
 .hidden{
   visibility: hidden!important;
+}
+
+.el-slider {
+  width: 200px;
 }
 </style>
