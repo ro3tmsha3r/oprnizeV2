@@ -1,7 +1,7 @@
 <template>
   <div :class="type === 'dark' ? 'bg-default' : ''">
        <div class="text-right"  style="background-color: transparent;">
-          <router-link to="/AddNewEmployee" class="text-white mb-2"
+          <router-link to="/AddNewEmployee/PersonalInfo" class="text-white mb-2"
             ><base-button class="mb-2" type="primary" icon="ni ni-fat-add" size="md">
               Add New Employee</base-button
             ></router-link

@@ -11,32 +11,40 @@
         </div>
       </template>
 
-      <form>
+      <!-- <Form as="el-form" :validation-schema="schema" @submit="onSubmit"> -->
+        <el-form ref="ruleForm" :model="DepartmentInfo" :rules="rules">
         <h6 class="heading-small text-muted mb-4">Department information</h6>
           <div class="row">
             <div class="col-lg-12">
               <label>Name Of Department</label> <br />
               <div size="medium">
+                <!-- <Field name="nameDepartment" v-slot="{ value, field, errorMessage }"> -->
+                <el-form-item prop="nameDepartment">
                 <el-radio
                   v-for="(item, index) in departments"
                   :key="index"
                   v-model="DepartmentInfo.nameDepartment"
                   :label="item.name.ar"
                   border
+                  @click="selectDept(item)"
                 >
                 </el-radio>
+                </el-form-item>
+              <!-- </Field> -->
               </div>
             </div>
           </div>
-          <div class="row">
+          <div class="row" v-if="isSelectDept">
             <div class="col-lg-6">
               <label>Section</label> <br />
+              <!-- <Field name="section" v-slot="{ value, field, errorMessage }"> -->
+                <el-form-item prop="section">
               <el-radio-group v-for="(item, index) in sections" :key="index" v-model="DepartmentInfo.section" @change="setIcon(item)">
                 <el-radio-button
+                  v-if="item.administration_id == deptActive"
                   class="border-0 mx-1"
                   v-bind="field"
-                  :model-value="value"
-                  :label="item.id"
+                  :label="item.name.en"
                 >
                     <div v-if="valueClicked == item" style="display: flex">
                       <i :class="[isActive ? 'fa fa-check' : 'fa fa-plus']"/>
@@ -48,31 +56,30 @@
                     </div>
                 </el-radio-button>
               </el-radio-group>
+              </el-form-item>
+              <!-- </Field> -->
             </div>
             <div class="col-lg-6">
               <label>Work Shift</label> <br />
-              <el-radio-group v-model="DepartmentInfo.workShift" size="medium">
-                <el-radio-button @click="showFWork" label="Supervisor">
-                  <div style="display: flex">
-                    <i
-                      :class="[isActiveFWork ? 'fa fa-check' : 'fa fa-plus']"
-                    ></i
-                    ><span>Supervisor</span>
-                  </div>
-                </el-radio-button>
+              <!-- <Field name="workShift" v-slot="{ value, field, errorMessage }"> -->
+                <el-form-item prop="workShift">
+              <el-radio-group v-for="(item, index) in workShifts" :key="index" v-model="DepartmentInfo.workShift" size="medium" @change="setIconWork(item)">
                 <el-radio-button
-                  @click="showSWork"
-                  label="Supervisors"
-                  class="ml-2"
-                >
-                  <div style="display: flex">
-                    <i
-                      :class="[isActiveSWork ? 'fa fa-check' : 'fa fa-plus']"
-                    ></i
-                    ><span>Supervisors</span>
-                  </div>
+                  v-bind="field"
+                  :model-value="value" 
+                  :label="item">
+                  <div v-if="valueClickedWork == item" style="display: flex">
+                      <i :class="[isActiveWork ? 'fa fa-check' : 'fa fa-plus']"/>
+                      <span class="pl-1">{{ item }}</span>
+                    </div>
+                    <div v-else style="display: flex">
+                      <i class="fa fa-plus"/>
+                      <span class="pl-1">{{ item }}</span>
+                    </div>
                 </el-radio-button>
               </el-radio-group>
+            </el-form-item>
+            <!-- </Field> -->
             </div>
           </div>
         <div class="row">
@@ -82,46 +89,25 @@
               label="Department Name"
               input-classes="form-control-alternative"
               v-model="DepartmentInfo.branchName"
-              required
             />
           </div>
         </div>
         <div class="text-right">
-          <router-link to="/AddNewEmployee/JobInformation"
-            ><button
-              class="mr-2"
-              style="
-                background: #464648 0% 0% no-repeat padding-box;
-                border-radius: 3px 3px 10px 3px;
-                opacity: 1;
-                height: 45px;
-                width: 90px;
-                color: white;
-              "
-            >
-              Next
-            </button></router-link
-          >
-          <button
-            @click="DepartmentInfos(DepartmentInfo)"
-            style="
-              background: #007cc4 0% 0% no-repeat padding-box;
-              border-radius: 3px 3px 10px 3px;
-              opacity: 1;
-              height: 45px;
-              width: 90px;
-              color: white;
-            "
-          >
-            Save
-          </button>
+          <el-button @click="DepartmentInfos(DepartmentInfo)"  style="background: #464648 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;height: 45px;width: 90px;color: white;">Next</el-button>
+          <el-button @click="DepartmentInfos(DepartmentInfo)" style="background: #007CC4 0% 0% no-repeat padding-box;border-radius: 3px 3px 10px 3px;height: 45px;width: 90px;color: white;">Add</el-button>
         </div>
-      </form>
+      <!-- </Form> -->
+      </el-form>
     </card>
   </div>
 </template>
 <script>
-import axios from "axios";
+import axios from 'axios'
+import { Field, Form } from "vee-validate";
+import * as yup from "yup";
+import { ElMessage } from 'element-plus'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 
 export default {
   name: "DepartmentInfo",
@@ -134,23 +120,80 @@ export default {
         branchName: "",
       },
       isActive: false,
+      isActiveWork: false,
       valueClicked: "",
+      valueClickedWork: "",
       departments: [],
       sections: [],
+      workShifts: ['supervisor','supervisors'],
+      isSelectDept: false,
+      deptActive: null,
+      rules: {
+        nameDepartment: [
+          {
+            required: true,
+            message: 'This field is required',
+            trigger: 'blur',
+          },
+        ],
+        section: [
+          {
+            required: true,
+            message: 'This field is required',
+            trigger: 'blur',
+          },
+        ],
+        workShift: [
+          {
+            required: true,
+            message: 'This field is required',
+            trigger: 'blur',
+          },
+        ],
+      }
     };
+  },
+  components: {
+    Form,
+    Field,
   },
   mounted(){
     this.getDepartments()
     this.getSections()
+    if( this.data[1] !== undefined ){
+    this.DepartmentInfo.nameDepartment =  this.data[1].nameDepartment
+    this.DepartmentInfo.section = this.data[1].section
+    this.DepartmentInfo.workShift = this.data[1].workShift
+    this.DepartmentInfo.branchName = this.data[1].branchName
+    }
+  },
+  computed: {
+    data() {
+      return this.$store.getters.getEmployees;
+    },
   },
   methods: {
+    setIcon(e){
+        this.isActive = true
+        this.valueClicked = e
+    },
+    setIconWork(e){
+        this.isActiveWork = true
+        this.valueClickedWork = e
+    },
+    selectDept(data){
+      console.log(data)
+      this.isSelectDept = true
+      this.deptActive = data.id
+      console.log(this.deptActive)
+    },
     getDepartments: function () {
       var app = this;
       axios
         .get("/administration")
         .then(function (response) {
           app.departments = response.data;
-          console.log(app.departments);
+          // console.log(app.departments);
         })
         .catch(function (error) {
           console.log(error);
@@ -162,7 +205,6 @@ export default {
         .get("/section")
         .then(function (response) {
           app.sections = response.data;
-          console.log(app.sections);
         })
         .catch(function (error) {
           console.log(error);
@@ -170,10 +212,46 @@ export default {
     },
     DepartmentInfos(data) {
       console.log("test");
-      let clone = { ...data };
-      this.$store.state.employees.push(clone);
-      this.$router.push({ path: "/AddNewEmployee/JobInformation" });
+      
+
+      this.$refs['ruleForm'].validate((valid) => {
+        if (valid) {
+          let clone = { ...data };
+          this.$store.state.employees.push(clone);
+          this.$router.push({ path: "/AddNewEmployee/JobInformation" });
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
     },
+  },
+  setup(props, context) {
+    const store = useStore()
+    const router = useRouter()
+
+    const schema = yup.object({
+      nameDepartment: yup.string().required().label("Name Of Department"),
+      section: yup.string().required().label("section"),
+      idNumber: yup.number().required().label("ID Number"),
+      country: yup.string().required().label("Nationality"),
+    });
+
+    function onSubmit(values, actions) {
+      // console.log(JSON.stringify(values, null, 2));
+      console.log(values);
+      let clone = {...values};
+      store.state.employees.push(clone);
+      router.push({ path: "/AddNewEmployee/JobInformation" });
+      this.DepartmentInfo.nameDepartment = values.nameDepartment
+      this.DepartmentInfo.section = values.section
+      this.DepartmentInfo.workShift = values.workShift
+      this.DepartmentInfo.workShift = values.workShift
+    }
+    return {
+      onSubmit,
+      schema,
+    };
   },
 };
 </script>

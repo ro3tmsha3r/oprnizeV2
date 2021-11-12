@@ -29,16 +29,9 @@
         />
         <sidebar-item
           :link="{
-            name: 'Departments',
-            icon: 'ni ni-building',
-            path: '/Departments',
-          }"
-        />
-        <sidebar-item
-          :link="{
             name: 'Requests',
             icon: 'ni ni-ungroup',
-            path: '/AddNewEmployee',
+            path: '/Requests',
           }"
         />
         <sidebar-item

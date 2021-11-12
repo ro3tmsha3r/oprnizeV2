@@ -93,23 +93,23 @@
                   </div>
                   <div style="display: flex">
                     <p>Card Number:</p>
-                    <span>{{ review[0].usernameEnglish }}</span>
+                    <span>{{ review[0].cardNumber }}</span>
                   </div>
                   <div style="display: flex">
                     <p>Release Date:</p>
-                    <span>123456789</span>
+                    <span>{{ review[0].releaseDate }}</span>
                   </div>
                   <div style="display: flex">
                     <p>Expiry Date:</p>
-                    <span>123456789</span>
+                    <span>{{ review[0].expiryDate }}</span>
                   </div>
                   <div style="display: flex">
                     <p>Passport Number:</p>
-                    <span>123456789</span>
+                    <span>{{ review[0].passportNumber }}</span>
                   </div>
                   <div style="display: flex">
                     <p>Expiry Date:</p>
-                    <span>123456789</span>
+                    <span>{{ review[0].expiryDate }}</span>
                   </div>
                 </div>
               </div>
@@ -345,9 +345,6 @@ export default {
     review() {
       return this.$store.getters.getEmployees;
     },
-    // getDepartmentInfos() {
-    //   return this.$store.getters.getEmployees;
-    // },
   },
 };
 </script>
