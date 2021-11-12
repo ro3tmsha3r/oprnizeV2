@@ -27,7 +27,7 @@ class VacationsController extends Controller
      */
     public function create()
     {
-        //
+        
     }
 
     /**
@@ -62,6 +62,29 @@ class VacationsController extends Controller
         $vacations->save();
         return $vacations;
     }
+
+    public function c(Request $request){
+
+        
+        $date_start = Carbon::parse($request->date_start);
+        $date_end = $date_start->addDays($request->days);
+
+        $vacations = new Vacations();
+        $vacations->employee_id = $request->employee_id;
+        $vacations->typevacation_id = $request->typevacation_id;
+        $vacations->date_start = $request->date_start;
+        $vacations->date_end = $date_end;
+        $vacations->days = $request->days;
+        $vacations->visa_request = 0;
+        $vacations->ticket_request = 0;
+        $vacations->paid_in_advance = 0;
+        //$vacations->advance_salary = $request->advance_salary;
+        $vacations->save();
+        return $vacations;
+
+        
+    }
+
 
     /**
      * Display the specified resource.

@@ -21,14 +21,17 @@ Route::get('/', function () {
 
 Auth::routes(['verify' => true]);
 
+
+
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    
 
     Route::get('/home', 'HomeController@index')->name('home');
     Route::resource('employee', 'EmployeeController');
     Route::resource('typevacations', 'TypevacationsController');
     Route::resource('vacations', 'VacationsController');
+
+    Route::get('vacations/{employee_id}/{typevacation_id}/{date_start}/{days}', 'VacationsController@c');
 
     Route::resource('country', 'CountryController');
     Route::resource('city', 'CityController');
@@ -36,6 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('section', 'SectionController');
     Route::resource('titlejob', 'TitlejobController');
     Route::resource('allowance', 'AllowanceController');
+    Route::resource('payroll', 'PayrollController');
 
 
 });
